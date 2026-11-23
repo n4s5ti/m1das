@@ -7,7 +7,7 @@ This is a separate Vercel project. It runs one Pots gateway in the persistent na
 Use a Pro or Enterprise team with Sandbox enabled and 24-hour sessions. Set these production environment variables on the **Oracle project**, not the storefront:
 
 - `AI_GATEWAY_API_KEY`: optional. A real Vercel AI Gateway API key, for a `vercel-ai-gateway/...` model. It is passed to each detached Pots gateway process. The Function's OIDC token is only for Sandbox API authentication: it is not usable as a 24-hour gateway credential. Leave it out when the model is signed in to with `/api/login`.
-- `IMESSAGE_PROJECT_ID` and `IMESSAGE_PROJECT_SECRET`: Photon Spectrum Cloud credentials. They are written mode 0600 to `~/.pots/secrets/imessage-oracle.env`, and Oracle's bot configuration points to that file.
+- A chat channel, at least one. `DISCORD_BOT_TOKEN`: a Discord bot's token, with the Message Content intent turned on in the Developer Portal. `IMESSAGE_PROJECT_ID` and `IMESSAGE_PROJECT_SECRET`: Photon Spectrum Cloud credentials. Each is written mode 0600 to `~/.pots/secrets/<channel>-oracle.env`, and Oracle's bot configuration points to that file.
 - `CRON_SECRET`: a strong random bearer token. Vercel Cron sends this automatically; use the same token to call either endpoint manually.
 - `POTS_GIT_REF`: full 40-character commit SHA pushed to the source repository, containing the iMessage implementation. It is required and pinned to avoid a moving branch.
 - `POTS_GIT_URL`: optional public Git URL, default `https://github.com/n4s5ti/p0ts.git`.

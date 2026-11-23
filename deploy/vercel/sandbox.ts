@@ -94,9 +94,21 @@ fi`], env: { POTS_GIT_URL: url, POTS_GIT_REF: ref } });
   }
 }
 
+// The chat channels with credentials: Discord, iMessage (Photon), or both. At least one.
+function channelKeys(): Record<string, string> {
+  const keys: Record<string, string> = {};
+  if (process.env.DISCORD_BOT_TOKEN) keys.DISCORD_BOT_TOKEN = required("DISCORD_BOT_TOKEN");
+  if (process.env.IMESSAGE_PROJECT_ID || process.env.IMESSAGE_PROJECT_SECRET) {
+    keys.IMESSAGE_PROJECT_ID = required("IMESSAGE_PROJECT_ID");
+    keys.IMESSAGE_PROJECT_SECRET = required("IMESSAGE_PROJECT_SECRET");
+  }
+  if (Object.keys(keys).length === 0) throw new Error("Set DISCORD_BOT_TOKEN, or IMESSAGE_PROJECT_ID and IMESSAGE_PROJECT_SECRET");
+  return keys;
+}
+
 // pots init refuses a model pi cannot use, so this fails until ORACLE_MODEL has a key or a login.
 async function configure(sandbox: Sandbox): Promise<void> {
-  const env = { ...gatewayKey(), IMESSAGE_PROJECT_ID: required("IMESSAGE_PROJECT_ID"), IMESSAGE_PROJECT_SECRET: required("IMESSAGE_PROJECT_SECRET"), ORACLE_MODEL: process.env.ORACLE_MODEL || DEFAULT_MODEL };
+  const env = { ...gatewayKey(), ...channelKeys(), ORACLE_MODEL: process.env.ORACLE_MODEL || DEFAULT_MODEL };
   const result = await sandbox.runCommand({ cmd: "sh", args: ["-c", `set -eu
 export PATH="$HOME/.local/bin:$PATH"
 if [ ! -f "$HOME/.pots/bots/oracle/bot.json" ]; then
@@ -106,11 +118,17 @@ node -e '
 const fs = require("node:fs"), path = require("node:path");
 const home = process.env.HOME, dir = path.join(home, ".pots/secrets"), config = path.join(home, ".pots/bots/oracle/bot.json");
 fs.mkdirSync(dir, {recursive:true, mode:0o700});
-fs.writeFileSync(path.join(dir, "imessage-oracle.env"), "IMESSAGE_PROJECT_ID=" + process.env.IMESSAGE_PROJECT_ID + "\\nIMESSAGE_PROJECT_SECRET=" + process.env.IMESSAGE_PROJECT_SECRET + "\\n", {mode:0o600});
-fs.chmodSync(path.join(dir, "imessage-oracle.env"), 0o600);
+const channel = (id, keys) => {
+  if (!keys.every(key => process.env[key])) return;
+  const file = path.join(dir, id + "-oracle.env");
+  fs.writeFileSync(file, keys.map(key => key + "=" + process.env[key] + "\\n").join(""), {mode:0o600});
+  fs.chmodSync(file, 0o600);
+  if (!bot.channels.some(c => c.id === id)) bot.channels.push({id, type:id, secrets:"~/.pots/secrets/" + id + "-oracle.env"});
+};
 const bot = JSON.parse(fs.readFileSync(config, "utf8"));
 bot.model = process.env.ORACLE_MODEL;
-if (!bot.channels.some(c => c.id === "imessage")) bot.channels.push({id:"imessage", type:"imessage", secrets:"~/.pots/secrets/imessage-oracle.env"});
+channel("discord", ["DISCORD_BOT_TOKEN"]);
+channel("imessage", ["IMESSAGE_PROJECT_ID", "IMESSAGE_PROJECT_SECRET"]);
 fs.writeFileSync(config, JSON.stringify(bot, null, 2) + "\\n");
 '`], env });
   if (result.exitCode !== 0) throw new Error(`Configuring the sandbox failed: ${(await result.stderr()).slice(-2000)}`);
@@ -163,7 +181,7 @@ exec pots login --link > "$HOME/oracle-login.log" 2>&1`], detached: true });
 
 export async function rotate(): Promise<{ action: string; sandboxId?: string }> {
   // Refuse to stop a working gateway if the next session cannot be configured.
-  for (const name of ["IMESSAGE_PROJECT_ID", "IMESSAGE_PROJECT_SECRET", "POTS_GIT_REF"]) required(name);
+  channelKeys();
   if (!/^[0-9a-f]{40}$/i.test(required("POTS_GIT_REF"))) throw new Error("POTS_GIT_REF must be a full commit SHA");
   return (await withLock(async () => {
     const existing = await lookup(NAME);
