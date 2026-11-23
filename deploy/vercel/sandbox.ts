@@ -97,7 +97,9 @@ fi`], env: { POTS_GIT_URL: url, POTS_GIT_REF: ref } });
 // The chat channels with credentials: Discord, iMessage (Photon), or both. At least one.
 function channelKeys(): Record<string, string> {
   const keys: Record<string, string> = {};
-  if (process.env.DISCORD_BOT_TOKEN) keys.DISCORD_BOT_TOKEN = required("DISCORD_BOT_TOKEN");
+  // M1DAS_BOT_TOKEN is the name the Discord bot's token already has in the oracle project.
+  const discord = process.env.DISCORD_BOT_TOKEN || process.env.M1DAS_BOT_TOKEN;
+  if (discord) keys.DISCORD_BOT_TOKEN = discord;
   if (process.env.IMESSAGE_PROJECT_ID || process.env.IMESSAGE_PROJECT_SECRET) {
     keys.IMESSAGE_PROJECT_ID = required("IMESSAGE_PROJECT_ID");
     keys.IMESSAGE_PROJECT_SECRET = required("IMESSAGE_PROJECT_SECRET");
