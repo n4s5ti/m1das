@@ -196,5 +196,7 @@ export async function health(): Promise<object> {
   if (!existing) return { sandboxId: null, ageMs: null, gatewayAlive: false, status: "missing" };
   if (existing.status !== "running") return { sandboxId: existing.sessionId, ageMs: null, gatewayAlive: false, status: existing.status };
   const session = existing.sandbox.currentSession();
-  return { sandboxId: session.sessionId, ageMs: Date.now() - session.createdAt.getTime(), gatewayAlive: await gatewayAlive(existing.sandbox), status: existing.status };
+  // The models pi can use in the sandbox: empty until a key or a login from /api/login is there.
+  const models = (await run(existing.sandbox, "sh", ["-c", "export PATH=\"$HOME/.local/bin:$PATH\"; pots login --list"])).match(/^ {2}\S+\/\S+$/gm)?.map((line) => line.trim()) ?? [];
+  return { sandboxId: session.sessionId, ageMs: Date.now() - session.createdAt.getTime(), gatewayAlive: await gatewayAlive(existing.sandbox), status: existing.status, models };
 }
