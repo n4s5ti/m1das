@@ -8,6 +8,7 @@ const DAY = 24 * 60 * 60 * 1000;
 const ROTATE_AFTER = 22 * 60 * 60 * 1000;
 const LEASE_SECONDS = 1800; // Longer than the 800-second function deadline.
 const DEFAULT_MODEL = "vercel-ai-gateway/anthropic/claude-sonnet-4.5";
+const CREATE = { name: NAME, persistent: true, timeout: DAY, resources: { vcpus: 2 }, image: "vercel/sandbox/universal:latest" };
 
 function required(name: string): string {
   const value = process.env[name];
@@ -24,7 +25,7 @@ export function authorized(header: string | undefined): boolean {
 }
 
 async function lookup(name: string): Promise<{ sandbox: Sandbox; status: string; sessionId: string } | undefined> {
-  const sandboxes = await Sandbox.list({ namePrefix: name });
+  const sandboxes = await Sandbox.list({ namePrefix: name, sortBy: "name" });
   for await (const item of sandboxes) {
     if (item.name === name) return { sandbox: await Sandbox.get({ name }), status: item.status, sessionId: item.currentSessionId };
   }
@@ -61,19 +62,17 @@ async function withLock<T>(work: () => Promise<T>): Promise<T | undefined> {
   }
 }
 
-// Returns true when a different POTS_GIT_REF was installed, so the running gateway must restart.
-async function ensureConfigured(sandbox: Sandbox): Promise<boolean> {
-  const key = required("AI_GATEWAY_API_KEY");
-  const projectId = required("IMESSAGE_PROJECT_ID");
-  const projectSecret = required("IMESSAGE_PROJECT_SECRET");
+// Optional: a model signed in to with /api/login needs no key.
+const gatewayKey = (): Record<string, string> => (process.env.AI_GATEWAY_API_KEY ? { AI_GATEWAY_API_KEY: required("AI_GATEWAY_API_KEY") } : {});
+
+// prepare builds the package on npm ci; install from this checkout so unpublished
+// channel changes are included. The marker holds the installed ref, so a new
+// POTS_GIT_REF reinstalls on the next start, rotation or login, and a gateway that
+// still runs the old build is stopped so the next start runs the new one.
+async function install(sandbox: Sandbox): Promise<void> {
   const ref = required("POTS_GIT_REF");
   if (!/^[0-9a-f]{40}$/i.test(ref)) throw new Error("POTS_GIT_REF must be a full commit SHA");
   const url = process.env.POTS_GIT_URL || "https://github.com/n4s5ti/p0ts.git";
-  const model = process.env.ORACLE_MODEL || DEFAULT_MODEL;
-  const env = { AI_GATEWAY_API_KEY: key, IMESSAGE_PROJECT_ID: projectId, IMESSAGE_PROJECT_SECRET: projectSecret, POTS_GIT_URL: url, POTS_GIT_REF: ref, ORACLE_MODEL: model };
-  // prepare builds the package on npm ci; install from this checkout so unpublished
-  // channel changes are included. The marker holds the installed ref, so a new
-  // POTS_GIT_REF reinstalls on the next start or rotation.
   const result = await sandbox.runCommand({ cmd: "sh", args: ["-c", `set -eu
 export PATH="$HOME/.local/bin:$PATH"
 marker="$HOME/pots-repo/.oracle-installed"
@@ -88,7 +87,18 @@ if [ "$(cat "$marker" 2>/dev/null || true)" != "$POTS_GIT_REF" ]; then
   ln -sf "$HOME/pots-repo/dist/cli/pots.js" "$HOME/.local/bin/pots"
   printf '%s\\n' "$POTS_GIT_REF" > "$marker"
   echo ORACLE_REINSTALLED
-fi
+fi`], env: { POTS_GIT_URL: url, POTS_GIT_REF: ref } });
+  if (result.exitCode !== 0) throw new Error(`Installing Pots in the sandbox failed: ${(await result.stderr()).slice(-2000)}`);
+  if ((await result.stdout()).includes("ORACLE_REINSTALLED") && (await gatewayAlive(sandbox))) {
+    await run(sandbox, "sh", ["-c", "pid=$(export PATH=\"$HOME/.local/bin:$PATH\"; pots status | sed -n 's/^gateway: running (process \\([0-9]*\\))$/\\1/p'); [ -z \"$pid\" ] || { kill \"$pid\"; while kill -0 \"$pid\" 2>/dev/null; do sleep 1; done; }"]);
+  }
+}
+
+// pots init refuses a model pi cannot use, so this fails until ORACLE_MODEL has a key or a login.
+async function configure(sandbox: Sandbox): Promise<void> {
+  const env = { ...gatewayKey(), IMESSAGE_PROJECT_ID: required("IMESSAGE_PROJECT_ID"), IMESSAGE_PROJECT_SECRET: required("IMESSAGE_PROJECT_SECRET"), ORACLE_MODEL: process.env.ORACLE_MODEL || DEFAULT_MODEL };
+  const result = await sandbox.runCommand({ cmd: "sh", args: ["-c", `set -eu
+export PATH="$HOME/.local/bin:$PATH"
 if [ ! -f "$HOME/.pots/bots/oracle/bot.json" ]; then
   pots init --yes --name Oracle --model "$ORACLE_MODEL" --about "AMATI's oracle" --no-service --no-chat
 fi
@@ -104,7 +114,6 @@ if (!bot.channels.some(c => c.id === "imessage")) bot.channels.push({id:"imessag
 fs.writeFileSync(config, JSON.stringify(bot, null, 2) + "\\n");
 '`], env });
   if (result.exitCode !== 0) throw new Error(`Configuring the sandbox failed: ${(await result.stderr()).slice(-2000)}`);
-  return (await result.stdout()).includes("ORACLE_REINSTALLED");
 }
 
 async function gatewayAlive(sandbox: Sandbox): Promise<boolean> {
@@ -114,13 +123,10 @@ async function gatewayAlive(sandbox: Sandbox): Promise<boolean> {
 }
 
 async function start(sandbox: Sandbox): Promise<void> {
-  const reinstalled = await ensureConfigured(sandbox);
-  if (reinstalled && (await gatewayAlive(sandbox))) {
-    // The old build is still running: stop it so the new ref starts below.
-    await run(sandbox, "sh", ["-c", "pid=$(export PATH=\"$HOME/.local/bin:$PATH\"; pots status | sed -n 's/^gateway: running (process \\([0-9]*\\))$/\\1/p'); [ -z \"$pid\" ] || { kill \"$pid\"; while kill -0 \"$pid\" 2>/dev/null; do sleep 1; done; }"]);
-  }
+  await install(sandbox);
+  await configure(sandbox);
   if (!(await gatewayAlive(sandbox))) {
-    await sandbox.runCommand({ cmd: "sh", args: ["-c", "export PATH=\"$HOME/.local/bin:$PATH\"; exec pots start"], env: { AI_GATEWAY_API_KEY: required("AI_GATEWAY_API_KEY") }, detached: true });
+    await sandbox.runCommand({ cmd: "sh", args: ["-c", "export PATH=\"$HOME/.local/bin:$PATH\"; exec pots start"], env: gatewayKey(), detached: true });
     for (let attempt = 0; attempt < 15; attempt++) {
       await delay(2000);
       if (await gatewayAlive(sandbox)) return;
@@ -129,14 +135,40 @@ async function start(sandbox: Sandbox): Promise<void> {
   }
 }
 
+// Serves Pots' login page from the gateway sandbox and returns its link. The person signs in there
+// (a subscription such as ChatGPT, or an API key) and pi writes the login to the sandbox's own
+// ~/.pi/agent/auth.json: no model credential passes through Vercel, and snapshots carry it on.
+export async function login(): Promise<{ url: string } | undefined> {
+  return withLock(async () => {
+    const existing = await lookup(NAME);
+    const sandbox = !existing ? await Sandbox.create(CREATE) : existing.status === "running" ? existing.sandbox : await Sandbox.get({ name: NAME, resume: true });
+    await install(sandbox);
+    // One login page at a time: a new call ends the page of the call before it. The process ID file
+    // outlives a snapshot, so the process is ended only when it still is a login page.
+    await run(sandbox, "sh", ["-c", `pid=$(cat "$HOME/oracle-login.pid" 2>/dev/null || true)
+if [ -n "$pid" ] && tr '\\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null | grep -q 'login --link'; then kill "$pid"; fi
+rm -f "$HOME/oracle-login.log"`]);
+    await sandbox.runCommand({ cmd: "sh", args: ["-c", `export PATH="$HOME/.local/bin:$PATH"
+echo $$ > "$HOME/oracle-login.pid"
+exec pots login --link > "$HOME/oracle-login.log" 2>&1`], detached: true });
+    // The first link waits for cloudflared's download, its tunnel and the tunnel's name in DNS.
+    for (let attempt = 0; attempt < 60; attempt++) {
+      await delay(2000);
+      const url = /^\s+(https:\/\/\S+)$/m.exec(await run(sandbox, "sh", ["-c", 'cat "$HOME/oracle-login.log" 2>/dev/null || true']))?.[1];
+      if (url) return { url };
+    }
+    throw new Error("The login page did not start; see ~/oracle-login.log in the sandbox");
+  });
+}
+
 export async function rotate(): Promise<{ action: string; sandboxId?: string }> {
   // Refuse to stop a working gateway if the next session cannot be configured.
-  for (const name of ["AI_GATEWAY_API_KEY", "IMESSAGE_PROJECT_ID", "IMESSAGE_PROJECT_SECRET", "POTS_GIT_REF"]) required(name);
+  for (const name of ["IMESSAGE_PROJECT_ID", "IMESSAGE_PROJECT_SECRET", "POTS_GIT_REF"]) required(name);
   if (!/^[0-9a-f]{40}$/i.test(required("POTS_GIT_REF"))) throw new Error("POTS_GIT_REF must be a full commit SHA");
   return (await withLock(async () => {
     const existing = await lookup(NAME);
     if (!existing) {
-      const sandbox = await Sandbox.create({ name: NAME, persistent: true, timeout: DAY, resources: { vcpus: 2 }, image: "vercel/sandbox/universal:latest" });
+      const sandbox = await Sandbox.create(CREATE);
       await start(sandbox);
       return { action: "bootstrapped", sandboxId: sandbox.currentSession().sessionId };
     }
