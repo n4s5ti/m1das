@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { authorized, health } from "../sandbox.ts";
+import { authorized, health } from "../sandbox.js";
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   if (!authorized(req.headers.authorization)) {

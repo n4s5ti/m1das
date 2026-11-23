@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { authorized, rotate } from "../sandbox.ts";
+import { authorized, rotate } from "../sandbox.js";
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   if (!authorized(req.headers.authorization)) {
