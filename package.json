@@ -71,6 +71,7 @@
     "@effect/platform-node-shared": "4.1.4",
     "@microsoft/teams.api": "2.2.1",
     "@microsoft/teams.apps": "2.2.1",
+    "@photon-ai/chat-adapter-imessage": "3.2.1",
     "chat": "4.44.0",
     "discord.js": "14.28.1",
     "effect": "4.1.4",

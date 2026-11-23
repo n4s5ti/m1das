@@ -102,6 +102,10 @@ Either way, the new bot sets itself up as the first one did. It says hello, chec
 
 A real example: on 2026-11-14, Probe, the bot that develops Pots, made Bloom, a marketing bot, this way. Bloom created its own Slack app and its own desktop; the only step a person did was typing the password of an X account.
 
+## iMessage
+
+Pots can connect to iMessage through Photon Spectrum Cloud. The bot follows its `imessage-channel` skill: it asks for a project ID and secret through `pots chat`, keeps them in its own `~/.pots/secrets/imessage-<bot ID>.env`, and adds `{ "id": "imessage", "type": "imessage", "secrets": "~/.pots/secrets/imessage-<bot ID>.env" }` to its channels. The env file has `IMESSAGE_PROJECT_ID` and `IMESSAGE_PROJECT_SECRET` lines, not JSON. DMs and group chats work; Spectrum does not provide history across process restarts, so messages can be missed while Pots is down. A crash during a send can repeat it. Inbound file downloads are available only during the receiving session.
+
 ## When something goes wrong
 
 - `pots status` shows whether the gateway runs and each bot's state. When the bot cannot use its model, which is usually a model login, it says "I could not work on this" in the place that woke it; `pots status` and `pots chat` show why.

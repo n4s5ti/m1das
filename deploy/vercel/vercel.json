@@ -1,0 +1,4 @@
+{
+  "functions": { "api/rotate.ts": { "maxDuration": 800 }, "api/health.ts": { "maxDuration": 60 } },
+  "crons": [{ "path": "/api/rotate", "schedule": "0 * * * *" }]
+}

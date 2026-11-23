@@ -1,0 +1,9 @@
+{
+  "name": "amati-oracle-sandbox",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "24.x" },
+  "scripts": { "bootstrap": "node bootstrap.ts" },
+  "dependencies": { "@vercel/sandbox": "4.1.0" },
+  "devDependencies": { "@types/node": "24.10.1", "typescript": "5.9.3" }
+}

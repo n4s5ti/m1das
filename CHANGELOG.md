@@ -2,6 +2,11 @@
 
 What changed in each version of pi-durable-bot (Pots). To upgrade, run `npm install -g pi-durable-bot@latest`, then `pots service restart`.
 
+## Unreleased
+
+### Added
+- **iMessage through Photon Spectrum Cloud.** Connect a bot with the `imessage-channel` skill for DMs, group chats, tapbacks and files. Spectrum has no history across process restarts, and a crash during a send can repeat it.
+
 ## 0.8.8 (2026-11-21)
 
 Pots runs on pi 1.6.0: GPT-6.2 Astra and GPT-6.2 Sol, with GPT-6.2 Sol as the default model. Images that any tool gives the bot are fitted to the model's limits, as in the pi command line, and each MCP server is a namespace of its own in code mode. After this upgrade, a bot's database cannot go back to 0.8.7.
