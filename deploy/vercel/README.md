@@ -28,6 +28,17 @@ Vercel provides OIDC credentials to production Functions automatically. For loca
 
 Call `/api/health` with `Authorization: Bearer <CRON_SECRET>` to get the current session ID, age in milliseconds, sandbox status, and gateway liveness from `pots status`. `/api/rotate` accepts the same authorization and can be invoked manually. Both return 401 without it.
 
+## Approval card relay
+
+The AMATI tree approval broker sends signed requests to `POST /api/discord`. The relay forwards only the Discord requests needed to manage approval cards in the configured approver's direct messages.
+
+Set these environment variables on the Oracle project; neither is secret:
+
+- `APPROVAL_RELAY_PUBLIC_KEY`: the broker's raw 32-byte Ed25519 public key, encoded as 64 hex characters.
+- `APPROVAL_APPROVER_ID`: the approver's Discord user ID.
+
+The relay reads its bot token from `DISCORD_BOT_TOKEN || M1DAS_BOT_TOKEN`. Keep that token in Vercel; the broker does not need it.
+
 ## Sign in to a model
 
 To run Oracle on a subscription such as ChatGPT instead of an AI Gateway key, call `/api/login` with the same authorization. It creates the sandbox if there is none, installs Pots, runs `pots login --link` in it and answers `{"url": "…"}`: Pots' own login page, served from the sandbox through a Cloudflare Quick Tunnel. Open the link on any device and sign in. It works for an hour, and a new call ends the page of the call before it. The login is written to `~/.pi/agent/auth.json` inside the sandbox, where pi refreshes it and snapshots carry it on; no model credential is stored in Vercel. Sign in there instead of copying a login from another computer: each refresh replaces the login's refresh token, so two computers that refresh one login may sign each other out.
