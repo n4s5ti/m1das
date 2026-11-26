@@ -7,10 +7,12 @@
   },
   "scripts": {
     "bootstrap": "node bootstrap.ts",
+    "build:web": "npm --prefix web ci && npm --prefix web run build",
     "test": "node --test"
   },
   "dependencies": {
-    "@vercel/sandbox": "4.0.0"
+    "@vercel/sandbox": "4.0.0",
+    "ai": "7.0.183"
   },
   "devDependencies": {
     "@types/node": "24.10.1",

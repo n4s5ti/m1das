@@ -2,7 +2,7 @@ import { randomUUID, timingSafeEqual } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { Sandbox } from "@vercel/sandbox";
 
-const NAME = "amati-oracle";
+export const NAME = "amati-oracle";
 const LOCK_NAME = "amati-oracle-coordinator";
 const DAY = 24 * 60 * 60 * 1000;
 const ROTATE_AFTER = 22 * 60 * 60 * 1000;
@@ -24,7 +24,7 @@ export function authorized(header: string | undefined): boolean {
   return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
-async function lookup(name: string): Promise<{ sandbox: Sandbox; status: string; sessionId: string } | undefined> {
+export async function lookup(name: string): Promise<{ sandbox: Sandbox; status: string; sessionId: string } | undefined> {
   const sandboxes = await Sandbox.list({ namePrefix: name, sortBy: "name" });
   for await (const item of sandboxes) {
     if (item.name === name) return { sandbox: await Sandbox.get({ name }), status: item.status, sessionId: item.currentSessionId };
