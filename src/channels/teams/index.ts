@@ -332,7 +332,7 @@ export class TeamsChannel implements ChannelAdapter {
       return;
     }
     const http = this.#env.http;
-    if (!http) throw new Error(`channel ${this.id}: HTTP mode needs Pots' page server`);
+    if (!http) throw new Error(`channel ${this.id}: HTTP mode needs m1das' page server`);
     this.#route = http.serve((request) => this.#request(request, adapter));
     const base = http.publicUrl();
     sink.log("taking Teams requests", {

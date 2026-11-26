@@ -294,7 +294,7 @@ export function renderBusy(screen: Screen, lease: Lease, idleMs: number, self: s
     const whose = lease.bot === self ? "your" : `${lease.name}'s (bot folder ${lease.bot})`;
     return (
       `Not run: ${screen.label} is in use by a person, through ${whose} desktop page link ${link}, since ${formatTime(lease.since)}. ` +
-      `It frees when they hand the desktop back or the link ends; pots page list shows when it ends, and pots page unlink ${link}${lease.bot === self ? "" : ` --bot ${basename(lease.bot)}`} ends it now.`
+      `It frees when they hand the desktop back or the link ends; m1das page list shows when it ends, and m1das page unlink ${link}${lease.bot === self ? "" : ` --bot ${basename(lease.bot)}`} ends it now.`
     );
   }
   const who = lease.bot === self ? lease.agent : `${lease.agent} of ${lease.name} (bot folder ${lease.bot})`;

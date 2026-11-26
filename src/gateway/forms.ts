@@ -7,7 +7,7 @@ import { db } from "./log.ts";
 import { nameProblem } from "./routines.ts";
 
 /**
- * Forms the bot stored with pots form add, in the platform's own format, and what each opened form is for. A form is
+ * Forms the bot stored with m1das form add, in the platform's own format, and what each opened form is for. A form is
  * kept as it is, a JSON object: the channel adapter whose button opens it checks it. A button
  * whose ID is form:<name> or form:<name>:<extra> opens the form at once, within the 3 seconds the platform gives; the
  * opening is kept here before the form opens, so its submission gets its place and message back, also after a restart.
@@ -148,7 +148,7 @@ export class Forms extends Context.Service<
   }
 }
 
-/** The forms as pots form list shows them. */
+/** The forms as m1das form list shows them. */
 export function renderForms(forms: readonly StoredForm[]): string {
   if (forms.length === 0) return "No forms stored.";
   return forms

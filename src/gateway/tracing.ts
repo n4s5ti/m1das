@@ -9,7 +9,7 @@ import { db } from "./log.ts";
 import { LINK } from "./telemetry.ts";
 
 /**
- * Every span of the gateway, in the bot's SQLite file. `pots trace` shows them; the agent can read them with SQL.
+ * Every span of the gateway, in the bot's SQLite file. `m1das trace` shows them; the agent can read them with SQL.
  * Times are Unix ms. status: ok, error or interrupted. attributes: JSON. links: JSON list of {trace_id, span_id}.
  */
 const SCHEMA = `

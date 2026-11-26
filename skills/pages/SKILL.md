@@ -17,11 +17,11 @@ A guide, not a rule; you decide.
 | One question with a few options, and the platform has a fitting element | Native buttons or menus: the slack-channel, discord-channel and telegram-channel skills | One tap answers it; the click names the person's account |
 | Show something large: a plan, a report, a table, a chart | A display page | Long content does not fit a chat window |
 | Many inputs at once: choices, text, a comment on each step, approve or reject | An answer page | One page, one submit |
-| A secret: a password, a token, a key | The Pots password page (`pots page secret`) | The value goes straight to a file in the secrets folder, never into the chat, the log or your conversation |
-| A step only a person can do on your screen: a sign-in, a CAPTCHA, an approval | The Pots desktop page (`pots page desktop`): the desktop-page skill | They see and control your screen from their phone or computer, and hand it back |
-| A login to a model: a subscription or an API key, also TypeSafe's for Jev | The Pots login page (`pots page login`) | They sign in from any device; pi keeps the login, and you never see it |
+| A secret: a password, a token, a key | The Pots password page (`m1das page secret`) | The value goes straight to a file in the secrets folder, never into the chat, the log or your conversation |
+| A step only a person can do on your screen: a sign-in, a CAPTCHA, an approval | The Pots desktop page (`m1das page desktop`): the desktop-page skill | They see and control your screen from their phone or computer, and hand it back |
+| A login to a model: a subscription or an API key, also TypeSafe's for Jev | The Pots login page (`m1das page login`) | They sign in from any device; pi keeps the login, and you never see it |
 
-Never ask for a secret in a chat message, and never write your own page for one. If someone pastes a secret into a chat, tell them that the chat keeps it, and suggest they replace it. In the terminal channel (`pots chat`), ask-secret works as before.
+Never ask for a secret in a chat message, and never write your own page for one. If someone pastes a secret into a chat, tell them that the chat keeps it, and suggest they replace it. In the terminal channel (`m1das chat`), ask-secret works as before.
 
 ## Three kinds of pages
 
@@ -40,19 +40,19 @@ Change the files at any time, in place. The link stays the same: people reload a
 ## Links
 
 ```sh
-pots page link deploy-plan                        # one link that anyone who has it can use
-pots page link deploy-plan --for slack:@U123      # a link made for one person
-pots page unlink <link ID or URL>                 # the link stops working at once
-pots page list                                    # your pages, their links, when each was last opened and changed
+m1das page link deploy-plan                        # one link that anyone who has it can use
+m1das page link deploy-plan --for slack:@U123      # a link made for one person
+m1das page unlink <link ID or URL>                 # the link stops working at once
+m1das page list                                    # your pages, their links, when each was last opened and changed
 ```
 
-`pots page list` also lists your password links (`secretLinks`, IDs S1, S2, …), desktop links (`desktopLinks`, D1, D2, …) and login links (`loginLinks`, G1, G2, …), and `pots page unlink` takes those back too.
+`m1das page list` also lists your password links (`secretLinks`, IDs S1, S2, …), desktop links (`desktopLinks`, D1, D2, …) and login links (`loginLinks`, G1, G2, …), and `m1das page unlink` takes those back too.
 
-`pots page link` prints JSON: `{"link": "<link ID>", "url": "https://…/p/<token>/", "via": "public-url" or "quick-tunnel", "note": "…"}`. `note` comes with a Quick Tunnel and gives its facts (see below). Nobody can guess a link, but anyone who has it can open it, and a link can be forwarded.
+`m1das page link` prints JSON: `{"link": "<link ID>", "url": "https://…/p/<token>/", "via": "public-url" or "quick-tunnel", "note": "…"}`. `note` comes with a Quick Tunnel and gives its facts (see below). Nobody can guess a link, but anyone who has it can open it, and a link can be forwarded.
 
 - Make a link per person with `--for <person address>` when you want to know whose link an answer came through. Then say "someone used the link made for Alice", never "Alice answered": you know the link, not the person. To know for sure who answered, use a platform button: the platform names the account that clicked.
 - Turn link previews off when you post a link (the channel skills say how). A platform's preview opens the link from its own servers.
-- With a Quick Tunnel, the address changes each time the gateway starts, so links sent before stop working; `pots page link` again gives a new link to the same page.
+- With a Quick Tunnel, the address changes each time the gateway starts, so links sent before stop working; `m1das page link` again gives a new link to the same page.
 
 ## The kit
 
@@ -365,7 +365,7 @@ The answers of the example page look like this:
 ## The password page
 
 ```sh
-pots page secret --file slack-ada.env --keys SLACK_APP_TOKEN,SLACK_BOT_TOKEN --text "Paste the two Slack tokens from step 5" --for slack:@U123
+m1das page secret --file slack-ada.env --keys SLACK_APP_TOKEN,SLACK_BOT_TOKEN --text "Paste the two Slack tokens from step 5" --for slack:@U123
 ```
 
 Name the file for yourself, as here for the bot `ada`: other bots on this computer keep their secrets in the same folder.
@@ -385,12 +385,12 @@ You never see the values; they are not in the log, the wake or a trace. Then use
 When you need a model or a judge that is not signed in on this computer, or a login has expired, and the person who pays for it is not at a terminal here, send them a login link:
 
 ```sh
-pots page login --provider openai-codex --text "Sign in with your ChatGPT account, so I can use GPT for the reports" --for slack:@U123
+m1das page login --provider openai-codex --text "Sign in with your ChatGPT account, so I can use GPT for the reports" --for slack:@U123
 ```
 
-`--provider` is optional: without it, they choose. pi's provider IDs are in `pots login --list` (those signed in) and in the error of a wrong `--provider`. It prints JSON: `{"link": "G1", "url": "https://…/g/<token>/", "expires": "<time>", "via": …, "note": …}`.
+`--provider` is optional: without it, they choose. pi's provider IDs are in `m1das login --list` (those signed in) and in the error of a wrong `--provider`. It prints JSON: `{"link": "G1", "url": "https://…/g/<token>/", "expires": "<time>", "via": …, "note": …}`.
 
-The page is Pots' own. It runs pi's own login on this computer, as `pots login` does in a terminal: the person chooses a subscription (ChatGPT, Claude, GitHub Copilot, Grok, Kimi and more) or an API key (any of pi's providers, also TypeSafe for Jev), and the page shows what pi asks and shows. A sign-in that needs a browser on this computer works from their phone too: where pi offers a device code or a copy code, the page puts it first; otherwise they copy the address of the page that cannot load at the end and paste it. Ways that need setting up on this computer itself (an AWS credential chain or profile, Google's Application Default Credentials or a service account file) are not offered there; the page tells them to ask you, and you set those up in your shell.
+The page is Pots' own. It runs pi's own login on this computer, as `m1das login` does in a terminal: the person chooses a subscription (ChatGPT, Claude, GitHub Copilot, Grok, Kimi and more) or an API key (any of pi's providers, also TypeSafe for Jev), and the page shows what pi asks and shows. A sign-in that needs a browser on this computer works from their phone too: where pi offers a device code or a copy code, the page puts it first; otherwise they copy the address of the page that cannot load at the end and paste it. Ways that need setting up on this computer itself (an AWS credential chain or profile, Google's Application Default Credentials or a service account file) are not offered there; the page tells them to ask you, and you set those up in your terminal.
 
 - Nothing happens before they press Start, and only the browser that pressed Start first can use the link. It works for an hour unopened, then 15 minutes after Start, for one login or several, until they press Done.
 - A login is for every bot and pi program of this user on this computer, and a new one replaces the provider's old one. The page says so before they sign in.
@@ -404,16 +404,17 @@ You are woken once for each login:
 login page: someone used link G1 (made for slack:@U123) and signed in to OpenAI (ChatGPT Plus/Pro) (provider openai-codex, subscription), for every bot and pi on this computer. Usable now: openai-codex/…, …. openai-codex/gpt-… answered when Pots tried it.
 ```
 
-It says when the login replaced one, and lists the judges for a provider that has them. You never see a key, a code, a sign-in address or the account. The page tried pi's default model of the provider, as `pots login` does, but chose nothing for you: the model you think with is `model` in your bot.json, and which models do which work is the person's to say, so ask them, or follow what your AGENTS.md says. When nobody signed in by the end of the link, you are woken once more with that, and with how many sign-ins failed; the page showed them why.
+It says when the login replaced one, and lists the judges for a provider that has them. You never see a key, a code, a sign-in address or the account. The page tried pi's default model of the provider, as `m1das login` does, but chose nothing for you: the model you think with is `model` in your bot.json, and which models do which work is the person's to say, so ask them, or follow what your AGENTS.md says. When nobody signed in by the end of the link, you are woken once more with that, and with how many sign-ins failed; the page showed them why.
 
-When you cannot think at all, because your only login has expired, you cannot make the link. The person, or an agent in a terminal on this computer, then runs `pots login --link`: it serves the same page without a bot, prints the link, and prints each login.
+When you cannot think at all, because your only login has expired, you cannot make the link. The person, or an agent in a terminal on this computer, then runs `m1das login --link`: it serves the same page without a bot, prints the link, and prints each login.
+
 
 ## Where links point: a Quick Tunnel or your own address
 
 Pots serves pages on this computer only (127.0.0.1, at `pagePort` in `~/.pots/settings.json`). The internet reaches them in one of two ways:
 
 - `publicUrl` in `~/.pots/settings.json` is set (a Tailscale Funnel address, a domain, a reverse proxy): links use it, and no Quick Tunnel starts. `via` is `public-url`.
-- `publicUrl` is not set: Pots starts a Cloudflare [Quick Tunnel](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/) at the first `pots page link`, `pots page secret`, `pots page desktop` or `pots page login`, and keeps it until the gateway stops. `via` is `quick-tunnel`. All bots of this computer share it.
+- `publicUrl` is not set: Pots starts a Cloudflare [Quick Tunnel](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/) at the first `m1das page link`, `m1das page secret`, `m1das page desktop` or `m1das page login`, and keeps it until the gateway stops. `via` is `quick-tunnel`. All bots of this computer share it.
 
 What a Quick Tunnel means, from Cloudflare's docs and how it works:
 
@@ -434,7 +435,7 @@ What a Quick Tunnel means, from Cloudflare's docs and how it works:
 4. See what is mapped already: `tailscale funnel status` and `tailscale serve status`. Tailscale is one per computer, shared by every user and every Pots on it, and Funnel listens only on ports 443, 8443 and 10000. On a computer that others use, take a port that is free, or a path under a port (`--set-path /<path>`), and never change, replace or `reset` a mapping you did not make.
 5. Map the page port (`pagePort` in `~/.pots/settings.json`): `tailscale funnel --bg <pagePort>` for port 443, or `tailscale funnel --bg --https=8443 <pagePort>`, or add `--set-path /<path>`. `--bg` keeps it after restarts. The first time, Tailscale prints a link to a page where the person approves Funnel for their tailnet: send it to them.
 6. The address can take up to 10 minutes to work the first time (DNS). Check it: `curl -sS https://<machine>.<tailnet>.ts.net[:<port>][/<path>]/__pots/kit/pots.css` must print the stylesheet. If it does not after 10 minutes, the mapping is wrong; do not use it.
-7. Ask the person before you set or change `publicUrl`: every link that any bot of this computer sent before stops working, because it points at the old address. Then write `"publicUrl": "https://<machine>.<tailnet>.ts.net[:<port>][/<path>]"` into `~/.pots/settings.json`, keeping `pagePort`. The next `pots page link` should say `"via": "public-url"`. Note the change and the date in the memory all bots share (`~/.pots/memory/`), so the other bots know why their old links stopped.
+7. Ask the person before you set or change `publicUrl`: every link that any bot of this computer sent before stops working, because it points at the old address. Then write `"publicUrl": "https://<machine>.<tailnet>.ts.net[:<port>][/<path>]"` into `~/.pots/settings.json`, keeping `pagePort`. The next `m1das page link` should say `"via": "public-url"`. Note the change and the date in the memory all bots share (`~/.pots/memory/`), so the other bots know why their old links stopped.
 8. Tell the person about [key expiry](https://tailscale.com/docs/features/access-control/key-expiry): Tailscale signs a computer out after 180 days by default, and then the links stop working until someone signs in again. They can turn it off for this computer in the Tailscale admin console (Machines, the menu of this machine, Disable key expiry). Key expiry is a security feature: with it off, a lost or stolen computer stays in their tailnet until they remove it. Let them choose.
 
 Also tell them: the address shows the machine's name and the tailnet's name to everyone who gets a link; Funnel is in beta and has bandwidth limits.
@@ -462,4 +463,4 @@ All pages of this computer, of every bot, are under one address, so the browser 
 - Pots deletes a page, with its links, when nobody opened it, you made no link to it and you did not change it for 30 days. Pages in `pages/keep/` are never deleted that way.
 - A password page link expires 1 hour after you made it, unless it was used before. A desktop page link ends as the desktop-page skill says.
 - Deleting a bot deletes its pages and links.
-- `pages/keep/` grows until you tidy it. Look through it now and then and ask the people whether old pages can go; a routine helps, for example `pots routine add tidy-pages --cron "0 10 1 * *" --note "Look through pages/keep/"`.
+- `pages/keep/` grows until you tidy it. Look through it now and then and ask the people whether old pages can go; a routine helps, for example `m1das routine add tidy-pages --cron "0 10 1 * *" --note "Look through pages/keep/"`.

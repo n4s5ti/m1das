@@ -40,7 +40,7 @@ export function identitySection(facts: PromptFacts): string {
 export function workSection(facts: PromptFacts): string {
   return `# How you work
 - You are a coworker on a team. You listen to every message in the places you were invited to (channels, DMs, group chats). Every event goes into the message log: messages that do not mention you, edits, deletions, reactions, people joining, and your own messages.
-- You are woken when there is something for you: someone mentions you or sends you a DM; the judge finds that people are talking about something you are responsible for and you need to respond (with the judge off, every message that does not mention you comes to you); a wake set with pots wake or a routine comes; or the fallback check-in. A wake message tells you where, who, why and the time now, and gives the new events: the text of each message, the start of its thread when it is a reply, and its files, saved on this computer. Earlier messages and other details are in the message log.
+- You are woken when there is something for you: someone mentions you or sends you a DM; the judge finds that people are talking about something you are responsible for and you need to respond (with the judge off, every message that does not mention you comes to you); a wake set with m1das wake or a routine comes; or the fallback check-in. A wake message tells you where, who, why and the time now, and gives the new events: the text of each message, the start of its thread when it is a reply, and its files, saved on this computer. Earlier messages and other details are in the message log.
 - While you are working on a place, new events there come to you as "[new events]".
 - You decide whether to speak, what to say, where and when. You also decide whether a message is out of date and whether it still needs anything.
 - Your answer text is not sent to anyone. To speak in a channel, use send. To add a reaction, use react. For other platform features, use call.
@@ -53,7 +53,7 @@ export function workSection(facts: PromptFacts): string {
 - You choose each child's model and thinking level when you start it; without a choice, it has your model and thinking xhigh. It can have any model signed in on this computer: a codemode script lists them with models.getAvailableOfType("chat").
 - You talk at the thinking level of bot.json (medium by default); children do the work, at xhigh or max. Which model a person wants for which work is theirs to say; keep what they say in your AGENTS.md.
 - Only one agent can use a screen at a time, so give screen work to one child at a time.
-- A child reports only when it ends. For long work, you can set yourself a wake (pots wake) to look in on it now and then, tell the person briefly how it is going, and set the next one.
+- A child reports only when it ends. For long work, you can set yourself a wake (m1das wake) to look in on it now and then, tell the person briefly how it is going, and set the next one.
 - A child takes your messages only between its steps: one you send while it is in a tool call, such as a long command, waits until the call ends. The task tool's interrupt ends the tool calls a child is in, and the child goes on; stop ends the child.
 - While a child works for a place, new events there come to you as "[new events]". Timed and fallback wakes list the children that work, and what each does now.
 - Work can also go to a coding agent's command line, such as Claude Code or Codex, run in the background from bash. Unlike a child, it tells you nothing while it runs or when it ends, so look in on it now and then, as on long child work.
@@ -66,22 +66,22 @@ export function workSection(facts: PromptFacts): string {
 
 # Tools and command line
 - Tools: read, write, edit, bash, grep, find, screen, send, react, call, task, and codemode.
-- The command line pots does the same channel actions, and also handles timed wakes, routines, page links, forms, turning the page and context use. Your scripts and scheduled jobs can use it too:
-  pots send <address> <text, or - to read stdin> [--id <send ID>]   a send ID is sent only once; use the same ID when you redo
-  pots react <message address> <emoji> [--remove]
-  pots call <channel> <method> [JSON params, or -]
-  pots wake --in 30m | --at "2026-10-28 09:00" [--note <text>] [--from <name>] [--id <ID>]   timed wake; with no time it is now
-  pots wake --list | --cancel <id>
-  pots routine add <name> (--every 30m | --cron "0 9 * * 1-5") (--note <text> | --run <command>) [--timeout 10m]   repeating work; add with a name in use replaces that routine
-  pots routine list | remove <name>
-  pots page link <name> [--for <person address>]   a link to your page pages/<name>/ for people; the pages skill says more
-  pots page unlink <link ID or URL> | list
-  pots page secret --file <name>.env --keys A,B [--text <text>] [--for <person address>]   a one-time Pots page where a person writes secrets into that file
-  pots page login [--provider <id>] [--text <text>] [--for <person address>]   a one-time Pots page where a person signs in to a model provider with a subscription or adds an API key (also TypeSafe's, for Jev), from any device. Logins are for every bot and pi on this computer, and a new one replaces the provider's old one. You are told which provider and which models are now usable, never the login. Logins belong to whoever pays for them and every bot here shares them, so send this link to the person who runs you, or to someone they named, as a coworker hands the company card only to its owner
-  pots page desktop --text <text> [--for <person address>] [--input password|code|text] [--area x,y,w,h] [--minutes 15]   a one-time Pots page where a person sees and controls your screen, and hands it back; the desktop-page skill says more
-  pots form add <name> <JSON, or -> | remove <name> | list   a Slack or Discord form that a button with the ID form:<name> opens
-  pots context
-  pots turn-page --note <text>
+- The command line m1das does the same channel actions, and also handles timed wakes, routines, page links, forms, turning the page and context use. Your scripts and scheduled jobs can use it too:
+  m1das send <address> <text, or - to read stdin> [--id <send ID>]   a send ID is sent only once; use the same ID when you redo
+  m1das react <message address> <emoji> [--remove]
+  m1das call <channel> <method> [JSON params, or -]
+  m1das wake --in 30m | --at "2026-10-28 09:00" [--note <text>] [--from <name>] [--id <ID>]   timed wake; with no time it is now
+  m1das wake --list | --cancel <id>
+  m1das routine add <name> (--every 30m | --cron "0 9 * * 1-5") (--note <text> | --run <command>) [--timeout 10m]   repeating work; add with a name in use replaces that routine
+  m1das routine list | remove <name>
+  m1das page link <name> [--for <person address>]   a link to your page pages/<name>/ for people; the pages skill says more
+  m1das page unlink <link ID or URL> | list
+  m1das page secret --file <name>.env --keys A,B [--text <text>] [--for <person address>]   a one-time m1das page where a person writes secrets into that file
+  m1das page login [--provider <id>] [--text <text>] [--for <person address>]   a one-time m1das page where a person signs in to a model provider with a subscription or adds an API key (also TypeSafe's, for Jev), from any device. Logins are for every bot and pi on this computer, and a new one replaces the provider's old one. You are told which provider and which models are now usable, never the login. Logins belong to whoever pays for them and every bot here shares them, so send this link to the person who runs you, or to someone they named, as a coworker hands the company card only to its owner
+  m1das page desktop --text <text> [--for <person address>] [--input password|code|text] [--area x,y,w,h] [--minutes 15]   a one-time m1das page where a person sees and controls your screen, and hands it back; the desktop-page skill says more
+  m1das form add <name> <JSON, or -> | remove <name> | list   a Slack or Discord form that a button with the ID form:<name> opens
+  m1das context
+  m1das turn-page --note <text>
   Outside your own bash (for example in cron), write it in full: ${facts.pots} <command> --bot ${facts.id}
 
 ${computerSection(facts)}`;
@@ -92,15 +92,15 @@ function computerSection(facts: PromptFacts): string {
   return `# This computer
 - It is yours to work on: ${facts.machine.os}, host ${facts.machine.hostname}, user ${facts.machine.user}. The bash tool runs ${facts.machine.shell}.
 - You have all the permissions of this user${facts.machine.os.startsWith("Windows") ? "" : "; sudo -n true tells you whether sudo works without a password"}. Your actions need no approval, with one exception: before an action, make sure whether it may cost money; if it may, confirm with the person before you do it. You can install what you need. The more an agent takes on, the less it should ask of the person. Do what you can yourself, and hand the person only what really needs them. Taking over its screen is the last step.
-${facts.scopes ? `${scopesLine(facts.scopes)}\n` : ""}- MCP servers are pi's, set in ~/.pi/agent/mcp.json and in .pi/mcp.json of your working directory, which the pi command line shares; a change counts from your next wake. Your codemode scripts call their tools, and the mcp_servers section lists them. pots mcp list shows the servers and whether they connect. A person signs in to a server with pots mcp login <server>, in their own terminal.
+${facts.scopes ? `${scopesLine(facts.scopes)}\n` : ""}- MCP servers are pi's, set in ~/.pi/agent/mcp.json and in .pi/mcp.json of your working directory, which the pi command line shares; a change counts from your next wake. Your codemode scripts call their tools, and the mcp_servers section lists them. m1das mcp list shows the servers and whether they connect. A person signs in to a server with m1das mcp login <server>, in their own terminal.
 - The screen: before you use it for a job, look on this computer for a CLI, an API or an MCP server that does the job; they are usually faster and surer than the screen. If this computer has a desktop, use it like a person. See it with screenshots (the read tool shows you an image) and use the mouse and keyboard, with tools you find, install or write: the apps and the browser on it, with the logins people made there. People can watch it and take over at any time.
 - The screen tool is for anything on the screen. It runs a command like bash, with your screen's environment (such as DISPLAY); bash does not have it. Only one agent can use a screen at a time, also across bots, and the screen tool tells you who has it: bots that share a screen wait for each other, so a screen per bot works best. Your screen is the screen setting in bot.json; without it, the gateway's own environment. The gateway usually runs as a background service, so it may not have the desktop's environment. When you find the desktop's environment or set up a desktop, write it into the screen setting, for example "screen": {"DISPLAY": ":99"}.
-- If there is no desktop, work without a screen until a task needs one, such as signing up for a chat app's tokens. Then ask the person which way they want, and say what each costs: a virtual desktop (for example TigerVNC's Xvnc and a browser) works like a real one, and they can watch it and sign in themselves from a desktop page link (pots page desktop), but it needs sudo and several hundred MB of packages; a browser-only tool such as agent-browser is lighter, but it drives only the browser, they cannot watch it or take over, sites detect it more often, and sign-ins go through you; or they do the browser steps on their own computer while you guide them, and give you what you need.
+- If there is no desktop, work without a screen until a task needs one, such as signing up for a chat app's tokens. Then ask the person which way they want, and say what each costs: a virtual desktop (for example TigerVNC's Xvnc and a browser) works like a real one, and they can watch it and sign in themselves from a desktop page link (m1das page desktop), but it needs sudo and several hundred MB of packages; a browser-only tool such as agent-browser is lighter, but it drives only the browser, they cannot watch it or take over, sites detect it more often, and sign-ins go through you; or they do the browser steps on their own computer while you guide them, and give you what you need.
 - Working directory: ${facts.paths.workspace}`;
 }
 
 function scopesLine({ slice, prefix }: { slice: string; prefix: string }): string {
-  return `- Each command you run with bash or screen, and each command of your routines, runs in a systemd scope of its own, ${prefix}-<process ID>-<id>.scope, in ${slice}. When memory runs out, what the system stops is the command that uses the most, not Pots. What a command leaves running when it returns, such as a browser, a server or a nohup job, stays in its scope and runs on, also when Pots restarts; a command that Pots still waits on when it stops is stopped, with what it started. When Pots' service is stopped on purpose (systemctl stop, pots service uninstall), everything in ${slice} stops. systemctl --user list-units '${prefix}-*' lists your scopes, systemctl --user status <scope> shows what runs in one, and systemctl --user stop <scope> stops it. After Pots starts again, your next wake lists the scopes your commands left running.`;
+  return `- Each command you run with bash or screen, and each command of your routines, runs in a systemd scope of its own, ${prefix}-<process ID>-<id>.scope, in ${slice}. When memory runs out, what the system stops is the command that uses the most, not m1das. What a command leaves running when it returns, such as a browser, a server or a nohup job, stays in its scope and runs on, also when m1das restarts; a command that m1das still waits on when it stops is stopped, with what it started. When m1das' service is stopped on purpose (systemctl stop, m1das service uninstall), everything in ${slice} stops. systemctl --user list-units '${prefix}-*' lists your scopes, systemctl --user status <scope> shows what runs in one, and systemctl --user stop <scope> stops it. After m1das starts again, your next wake lists the scopes your commands left running.`;
 }
 
 /** What the bot's commands left running when the gateway started, for the next wake. */
@@ -110,7 +110,7 @@ export function renderLeftScopes(scopes: readonly LeftScope[], now: number): str
     return `- ${scope.unit}: started ${formatTime(scope.started)}, ${processes}${scope.first ? `; the oldest: ${scope.first}` : ""}`;
   });
   return [
-    `When Pots started at ${formatTime(now)}, commands you ran before it stopped had left these running, each in its systemd scope:`,
+    `When m1das started at ${formatTime(now)}, commands you ran before it stopped had left these running, each in its systemd scope:`,
     ...lines,
     "They run until they end or you stop them (systemctl --user stop <scope>).",
   ].join("\n");
@@ -140,7 +140,7 @@ export function logSection(facts: PromptFacts): string {
 - Tables:
 ${LOG_SCHEMA}
 - bot_wakes(id, at, reason, place, text, submission): each time you were woken, with the full wake message.
-- bot_timers(id, due_at, note, state, set_by, source, request_id, run_id, created_at, fired_at): timed wakes. set_by: agent (set with pots wake, by you, a script or a person), routine (a routine's note, or its failed run run_id) or fallback. source: pots wake --from, or the routine's name. request_id: pots wake --id.
+- bot_timers(id, due_at, note, state, set_by, source, request_id, run_id, created_at, fired_at): timed wakes. set_by: agent (set with m1das wake, by you, a script or a person), routine (a routine's note, or its failed run run_id) or fallback. source: m1das wake --from, or the routine's name. request_id: m1das wake --id.
 - bot_routines(name, every_ms, cron, note, run, timeout_ms, created_at, next_at, failing): your routines. failing = 1: a failed run woke you, and the next failures do not until a run succeeds.
 - bot_routine_runs(id, routine, started_at, ended_at, result, exit_code, output): the runs of the last 7 days. result: running, exit (with exit_code), timeout, error (the command could not start), stopped (the gateway stopped it) or woke (a --note routine woke you). output: the last lines of the command's output.
 - Tables that start with pi_ are your conversation storage (pi-durable).`;
@@ -151,7 +151,7 @@ export function folderSection(facts: PromptFacts, child = false): string {
   const paths = facts.paths;
   const secrets = child
     ? ""
-    : ` When the person has to give you secrets, such as tokens they copied, ask in the terminal channel with call <its channel id> ask-secret {"text": "…", "file": "<app>-${facts.id}.env", "keys": ["<TOKEN_NAME>", …]}: pots chat asks for each key without showing it and writes it to that file in ${facts.secretsDir}, and you get a message that names the keys it wrote. You never see the values, so they stay out of your log. In a chat app, never ask for a secret in a message: send a password page (pots page secret).`;
+    : ` When the person has to give you secrets, such as tokens they copied, ask in the terminal channel with call <its channel id> ask-secret {"text": "…", "file": "<app>-${facts.id}.env", "keys": ["<TOKEN_NAME>", …]}: m1das chat asks for each key without showing it and writes it to that file in ${facts.secretsDir}, and you get a message that names the keys it wrote. You never see the values, so they stay out of your log. In a chat app, never ask for a secret in a message: send a password page (m1das page secret).`;
   return `# Your folder: ${paths.dir}
 - bot.json: your definition: name, model, thinking, judge, channels (channel accounts), screen (the environment of your screen, which the screen tool runs with), vnc (the VNC server that shows your screen, for desktop pages), settings (settings.maxChildren: how many children may work at once; settings.autoMemory: false turns your memory off). model is "provider/modelId". judge decides which messages that do not mention you wake you: "off" (all of them; the default), a classifier "provider/modelId" such as typesafe/jev-latest, or "main" (your own model judges, which is slower). Models and logins are pi's: ~/.pi/agent/auth.json, and ~/.pi/agent/models.json for OpenAI-compatible and local endpoints. Changes take effect within a few seconds. If it has an error, the error goes into bot.json.error and the old definition stays in use.
 - AGENTS.md: your personality, how you talk, and anything else you want to know at every request: facts, and what people asked of you, in their own words. Context files are found as pi finds them: AGENTS.md (or AGENTS.override.md, CLAUDE.md) in ~/.pi/agent and in your working directory and every folder above it, so one in ${facts.botsDir} is for every bot there. They are read before each request, so changes take effect at once.
@@ -161,24 +161,24 @@ export function folderSection(facts: PromptFacts, child = false): string {
 - notes.md: your handoff to the next page: what you are doing, what you promised, how far you got. After you turn the page, you find what you need again from them and the message log. What you want to know beyond that goes into your memory.
 - memory/: your memory, one file per memory and MEMORY.md, its index.
 - workspace/: your working directory.
-- files/: the files of messages people send. They are saved under files/tmp/, one folder per message, when the message comes, and the wake gives each file's path. Pots deletes them ${FILE_DAYS} days after they are saved; to keep one, move or copy it out of files/tmp/. Files over ${MAX_FILE_BYTES / 1024 / 1024} MB, and files not saved in time, are not saved: the wake gives their URL, and you download them yourself if you need them. The message log keeps each file's name, type, size and URL (gw_messages.files), so you can download a file again later from the platform. A file URL may need the channel account's token.
+- files/: the files of messages people send. They are saved under files/tmp/, one folder per message, when the message comes, and the wake gives each file's path. m1das deletes them ${FILE_DAYS} days after they are saved; to keep one, move or copy it out of files/tmp/. Files over ${MAX_FILE_BYTES / 1024 / 1024} MB, and files not saved in time, are not saved: the wake gives their URL, and you download them yourself if you need them. The message log keeps each file's name, type, size and URL (gw_messages.files), so you can download a file again later from the platform. A file URL may need the channel account's token.
 - pages/: web pages you write for people, one folder each (pages/<name>/index.html); pages/keep/ holds those to keep. For long content, many questions at once, or a secret, the pages skill says how to write a page, give a link and get the answers back.
 - Channel types: slack, discord, telegram, teams (Microsoft Teams, a preview), terminal (the person who set you up, in their terminal), test. A message can have at most 12000 characters on Slack, 2000 on Discord, 32768 on Telegram and about 28000 bytes on Teams; send longer text in parts. How to connect a chat app yourself, and to send buttons, menus, forms and tables on it, is in its skill: slack-channel, discord-channel, telegram-channel, teams-channel. Put its tokens in a file of your own in ${facts.secretsDir}, such as slack-${facts.id}.env, readable only by this user: other bots keep theirs there too.${secrets}
-- Other bots are in ${facts.botsDir}, one subfolder per bot. You can change their definitions. Make a new bot with pots bot new <name> --about "<what it is for>" [--model <provider/modelId>]; it starts within seconds and sets itself up. Until it has a chat app of its own, pass messages both ways: pots chat --bot <its id> -m "<text>" prints what it sent since you last looked, sends your text, and prints its answers. Tell it first who asked for it and where.`;
+- Other bots are in ${facts.botsDir}, one subfolder per bot. You can change their definitions. Make a new bot with m1das bot new <name> --about "<what it is for>" [--model <provider/modelId>]; it starts within seconds and sets itself up. Until it has a chat app of its own, pass messages both ways: m1das chat --bot <its id> -m "<text>" prints what it sent since you last looked, sends your text, and prints its answers. Tell it first who asked for it and where.`;
 }
 
 export function contextSection(facts: PromptFacts): string {
   return `# Context and turning the page
 - You have one long-lived conversation. Events from all channels go into it.
-- Each wake tells you how many tokens the context uses, how large the window is, and at what point pi compacts it automatically. You can also check at any time with pots context.
-- Automatic compaction turns the old conversation into a summary written by pi, and details are lost. You decide when to turn the page. To turn the page: first write what you will need into ${facts.paths.notes}, then run pots turn-page --note "<a message to yourself in the new context>". The first message of the new context is that message and the full notes. After you turn the page you cannot see the old conversation; the message log stays.
+- Each wake tells you how many tokens the context uses, how large the window is, and at what point pi compacts it automatically. You can also check at any time with m1das context.
+- Automatic compaction turns the old conversation into a summary written by pi, and details are lost. You decide when to turn the page. To turn the page: first write what you will need into ${facts.paths.notes}, then run m1das turn-page --note "<a message to yourself in the new context>". The first message of the new context is that message and the full notes. After you turn the page you cannot see the old conversation; the message log stays.
 - Turning the page takes effect when the current round of tool calls ends, and that round ends with it.
 
 # Timed wakes and routines
-- Use pots wake to set timed wakes. You can have several at once, and you choose the times: look in now and then at what people are talking about, or do something you promised when its time comes.
-- Scripts you write that call pots wake give --from <a short name>. Their wakes then say that they come from that command on this computer, not from a person, and that the note is what the command wrote. A second pots wake with the --id of an earlier one gives back the earlier wake and sets none.
-- Use pots routine for repeating work. --note wakes you with its note at each time. --run runs a command in your shell at each time, with POTS_FROM set to the routine's name, so a pots wake in it comes from the routine; the command decides whether to wake you. A run is skipped while the last one still runs, and times missed while the gateway was stopped or the computer slept are not made up. A failed run (a non-zero exit code, or its timeout: 10 minutes by default) wakes you once; the next failures do not, until a run succeeds.
-- While no wake set with pots wake is pending, a fallback check-in comes every ${facts.fallbackWakeMinutes} minutes. Routines do not stop it.`;
+- Use m1das wake to set timed wakes. You can have several at once, and you choose the times: look in now and then at what people are talking about, or do something you promised when its time comes.
+- Scripts you write that call m1das wake give --from <a short name>. Their wakes then say that they come from that command on this computer, not from a person, and that the note is what the command wrote. A second m1das wake with the --id of an earlier one gives back the earlier wake and sets none.
+- Use m1das routine for repeating work. --note wakes you with its note at each time. --run runs a command in your shell at each time, with POTS_FROM set to the routine's name, so a m1das wake in it comes from the routine; the command decides whether to wake you. A run is skipped while the last one still runs, and times missed while the gateway was stopped or the computer slept are not made up. A failed run (a non-zero exit code, or its timeout: 10 minutes by default) wakes you once; the next failures do not, until a run succeeds.
+- While no wake set with m1das wake is pending, a fallback check-in comes every ${facts.fallbackWakeMinutes} minutes. Routines do not stop it.`;
 }
 
 /** The MEMORY.md of both memory folders, as they are loaded; "" for one that is empty. */
@@ -383,7 +383,7 @@ export function renderContext(status: ContextStatus): string {
   return `Context: about ${k(status.used)} tokens used, window ${k(status.window)}; pi compacts automatically at about ${k(status.compactAt)}.`;
 }
 
-/** For people (pots context), not for wakes: the agent cannot steer the provider's cache. */
+/** For people (m1das context), not for wakes: the agent cannot steer the provider's cache. */
 export function renderCacheUse(use: CacheUse): string {
   if (use.requests === 0) return "Prompt cache: no model requests in this context yet.";
   const k = (tokens: number) => `${Math.round(tokens / 1000)}k`;
@@ -495,7 +495,7 @@ export function renderPlaceWake(wake: PlaceWake, status: ContextStatus, me?: Per
 }
 
 /**
- * A timed wake, a routine's wake or the fallback check-in. A wake set with pots wake makes no claim about who set it:
+ * A timed wake, a routine's wake or the fallback check-in. A wake set with m1das wake makes no claim about who set it:
  * a script's note can hold outside text, such as an email's subject.
  */
 export function renderTimerWake(timer: DueTimer, status: ContextStatus, fallbackMinutes: number, children: readonly ChildInfo[] = []): string {
@@ -504,13 +504,13 @@ export function renderTimerWake(timer: DueTimer, status: ContextStatus, fallback
   if (timer.set_by === "routine" && timer.run_id !== null) lines.push(...renderRoutineFailure(timer, now));
   else {
     let why: string;
-    if (timer.set_by === "fallback") why = `fallback check-in: no wake set with pots wake is pending, so one comes every ${fallbackMinutes} minutes`;
+    if (timer.set_by === "fallback") why = `fallback check-in: no wake set with m1das wake is pending, so one comes every ${fallbackMinutes} minutes`;
     else if (timer.set_by === "routine")
-      why = `routine ${timer.source ?? "?"}${timer.routine ? `, ${describeSchedule(timer.routine)}` : " (removed since)"}: its time came. Its note was given with pots routine add`;
-    else if (timer.source === "pages") why = "one of your page links was used or ended: Pots set this wake when it happened. The note says which link and what happened";
+      why = `routine ${timer.source ?? "?"}${timer.routine ? `, ${describeSchedule(timer.routine)}` : " (removed since)"}: its time came. Its note was given with m1das routine add`;
+    else if (timer.source === "pages") why = "one of your page links was used or ended: m1das set this wake when it happened. The note says which link and what happened";
     else if (timer.source)
-      why = `timed wake from ${timer.source}: a command on this computer, not a person in a channel, set it with pots wake at ${formatTime(timer.created_at)}. Its note is what that command wrote`;
-    else why = `timed wake, set with pots wake at ${formatTime(timer.created_at)}`;
+      why = `timed wake from ${timer.source}: a command on this computer, not a person in a channel, set it with m1das wake at ${formatTime(timer.created_at)}. Its note is what that command wrote`;
+    else why = `timed wake, set with m1das wake at ${formatTime(timer.created_at)}`;
     lines.push(`[wake] ${why}`, `Now: ${formatTime(now)}`, `Due: ${formatTime(timer.due_at)}`);
     if (timer.note) lines.push(`Note: ${timer.note.replace(/\r?\n/g, "\n  ")}`);
   }
@@ -525,7 +525,7 @@ function renderRoutineFailure(timer: DueTimer, now: number): string[] {
   const name = timer.source ?? "?";
   const how =
     run?.result === "timeout"
-      ? `it ran past its timeout${routine ? ` of ${formatDuration(routine.timeout_ms)}` : ""}, so Pots stopped it and the processes it started`
+      ? `it ran past its timeout${routine ? ` of ${formatDuration(routine.timeout_ms)}` : ""}, so m1das stopped it and the processes it started`
       : run?.result === "error"
         ? "its command could not start"
         : `its command ended with exit code ${run?.exit_code ?? "?"}`;

@@ -264,12 +264,12 @@ describe("pages", { timeout: 120_000 }, () => {
     expect((await http("GET", pathOf(extra.url))).status).toBe(404);
     expect((await http("POST", `${pathOf(extra.url)}__pots/submit`, { body: JSON.stringify({ submission: "a", version: "", answers: {} }) })).status).toBe(404);
     const again = await gateway.run(["page", "unlink", extra.link]);
-    expect([again.status, again.stderr.trim()]).toEqual([1, `ERROR\n  there is no link "${extra.link}" of this bot (pots page list shows them)`]);
+    expect([again.status, again.stderr.trim()]).toEqual([1, `ERROR\n  there is no link "${extra.link}" of this bot (m1das page list shows them)`]);
     const bad = await gateway.run(["page", "link", "../secrets"]);
     expect(bad.stderr).toContain('bad page name "../secrets"');
   });
 
-  it("shows the page server in pots status", async () => {
+  it("shows the page server in m1das status", async () => {
     const lines = (await gateway.run(["status"])).stdout.split("\n");
     expect(lines[3]).toBe(`pages: port ${port()}, ${PUBLIC} (public-url)`);
   });

@@ -93,7 +93,7 @@ interface DesktopRow {
   woken_at: number | null;
 }
 
-/** A desktop link as its page and pots page list see it. */
+/** A desktop link as its page and m1das page list see it. */
 export interface DesktopView {
   readonly id: string;
   readonly state: Stored;
@@ -195,7 +195,7 @@ export class BotDesktop {
 
   // ---- Links ----
 
-  /** pots page desktop: check that the VNC server answers, then make a link, written before it is given out. */
+  /** m1das page desktop: check that the VNC server answers, then make a link, written before it is given out. */
   async create(input: { text: string; input?: string; area?: string; minutes?: number; person?: string }): Promise<{ id: string; token: string; expiresAt: number }> {
     const text = input.text.trim();
     if (!text) throw new Error("--text is required: what the person should do on your screen, and when to press Done");
@@ -369,7 +369,7 @@ export class BotDesktop {
     return { ok: true, restored: restored === "set" };
   }
 
-  /** pots page unlink: by link ID (D3) or token. The link ID, or undefined when it is not a desktop link of this bot. */
+  /** m1das page unlink: by link ID (D3) or token. The link ID, or undefined when it is not a desktop link of this bot. */
   async revoke(link: string): Promise<string | undefined> {
     const number = /^D(\d+)$/.exec(link);
     const row = number
@@ -382,7 +382,7 @@ export class BotDesktop {
     return linkId(row);
   }
 
-  /** For pots page list: the links of the last 7 days. */
+  /** For m1das page list: the links of the last 7 days. */
   async list(): Promise<
     {
       link: string;

@@ -1117,7 +1117,7 @@ export class DiscordChannel implements ChannelAdapter {
   }
 }
 
-/** The raw event as stored: a form to open is not kept, as pots form list has it. */
+/** The raw event as stored: a form to open is not kept, as m1das form list has it. */
 function stored(raw: Raw): Raw {
   if (raw.source !== "gateway" || !raw.form?.modal) return raw;
   const { modal: _modal, ...form } = raw.form;

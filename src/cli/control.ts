@@ -27,7 +27,7 @@ export const resolveBot = (flag: Option.Option<string>) =>
     if (id) return existsSync(join(botDir(id), "bot.json")) ? Effect.succeed(id) : Effect.fail(userError(`there is no bot "${id}" in ${BOTS_DIR}`));
     const bots = listBots();
     if (bots.length === 1) return Effect.succeed(bots[0]!);
-    return Effect.fail(userError(bots.length === 0 ? "there are no bots yet; run pots init" : `say which bot with --bot <id> (bots: ${bots.join(", ")})`));
+    return Effect.fail(userError(bots.length === 0 ? "there are no bots yet; run m1das init" : `say which bot with --bot <id> (bots: ${bots.join(", ")})`));
   });
 
 /** Call a running bot's control endpoint. */
@@ -48,7 +48,7 @@ async function callEndpoint(socketPath: string, method: string, path: string, bo
       res.on("data", (chunk: Buffer) => chunks.push(chunk));
       res.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
     });
-    req.on("error", (error) => reject(new Error(`the bot is not running (${error.message}); start it with pots service install or pots start`)));
+    req.on("error", (error) => reject(new Error(`the bot is not running (${error.message}); start it with m1das service install or m1das start`)));
     req.end(payload);
   });
   const answer = JSON.parse(text) as { ok: boolean; result?: unknown; error?: string };

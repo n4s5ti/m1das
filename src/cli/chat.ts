@@ -11,7 +11,7 @@ import { writeSecrets } from "../core/env-file.ts";
 import { SECRETS_DIR } from "../core/home.ts";
 import { botDir, control, resolveBot, userError } from "./control.ts";
 
-// pots chat: talk to a bot in this terminal. What you type goes into its terminal channel; what it sends there shows up
+// m1das chat: talk to a bot in this terminal. What you type goes into its terminal channel; what it sends there shows up
 // here. The channel is a file, so messages wait while the bot is not running. When the bot asks for secrets, such as a
 // chat app's tokens, they are typed here without being shown and go straight to the secrets folder.
 
@@ -66,8 +66,8 @@ function readFrom(terminal: Terminal, offset: number): { lines: Line[]; offset: 
 }
 
 /**
- * How far pots chat has shown the bot's messages, in bytes of its file. pots chat -m prints first what the bot sent
- * after that, such as a new bot's hello, or what it sent after the last pots chat -m ended. Kept in the terminal folder;
+ * How far m1das chat has shown the bot's messages, in bytes of its file. m1das chat -m prints first what the bot sent
+ * after that, such as a new bot's hello, or what it sent after the last m1das chat -m ended. Kept in the terminal folder;
  * when it is missing, or does not point to the end of a line of the file as it is now, the end of the person's last
  * message.
  */
@@ -97,7 +97,7 @@ function markShown(terminal: Terminal, offset: number): void {
     mkdirSync(dirname(terminal.file), { recursive: true });
     writeFileSync(join(dirname(terminal.file), "shown"), `${offset}\n`);
   } catch {
-    // Only a convenience: without it, the next pots chat -m starts after the person's last message.
+    // Only a convenience: without it, the next m1das chat -m starts after the person's last message.
   }
 }
 
@@ -126,7 +126,7 @@ function answerSecret(terminal: Terminal, request: Line, values: Record<string, 
   const skipped = keys.filter((key) => !values[key]);
   if (given.length > 0) writeSecrets(path, Object.fromEntries(given.map((key) => [key, values[key]!])));
   const text = [given.length > 0 ? `wrote ${given.join(", ")} to ${path}` : "", skipped.length > 0 ? `skipped ${skipped.join(", ")}` : ""].filter(Boolean).join("; ");
-  say(terminal, `(pots chat: ${text})`, request.id);
+  say(terminal, `(m1das chat: ${text})`, request.id);
   return text;
 }
 
@@ -149,7 +149,7 @@ export const chatInteractive = (id: string) =>
     }
     markShown(terminal, start.offset);
     const since = Date.now();
-    if ((yield* Effect.promise(() => statusOf(id))) === undefined) console.log(dim(`${terminal.name} is not running. Messages wait until it starts (pots service install, or pots start).`));
+    if ((yield* Effect.promise(() => statusOf(id))) === undefined) console.log(dim(`${terminal.name} is not running. Messages wait until it starts (m1das service install, or m1das start).`));
     console.log(dim(`Talking to ${terminal.name}. Ctrl+C to leave.`));
     yield* Effect.callback<void>((resume) => {
       // One readline at a time: the chat's, or a fresh one for each request for secrets, with its echo muted and no
@@ -250,7 +250,7 @@ export const chatInteractive = (id: string) =>
   });
 
 /**
- * Print what the bot sent since pots chat last showed it, send one message, and print the bot's answers until it is done
+ * Print what the bot sent since m1das chat last showed it, send one message, and print the bot's answers until it is done
  * working, or until the timeout. For scripts, tests, and a bot that passes messages for a new bot.
  */
 const chatOnce = (id: string, text: string, timeoutMs: number) =>
@@ -291,7 +291,7 @@ export const chatCommand = Command.make(
   "chat",
   {
     bot: Flag.String("bot").pipe(Flag.optional, Flag.withDescription("Which bot. Default: the only bot.")),
-    message: Flag.String("message").pipe(Flag.withAlias("m"), Flag.optional, Flag.withDescription("Print what the bot sent since pots chat last showed it, send this, print the answer and leave.")),
+    message: Flag.String("message").pipe(Flag.withAlias("m"), Flag.optional, Flag.withDescription("Print what the bot sent since m1das chat last showed it, send this, print the answer and leave.")),
     timeout: Flag.Int("timeout").pipe(Flag.withDefault(600), Flag.withDescription("With --message: seconds to wait for the answer.")),
   },
   (input) =>

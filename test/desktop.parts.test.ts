@@ -183,7 +183,7 @@ describe("desktop links", () => {
     expect(lease).toMatchObject({ bot: f.dir, conversation: "desktop:D1", agent: "a person, through desktop page link D1" });
     const busy = renderBusy({ key: "x11:local:91", label: "DISPLAY=:91", env: {} }, lease, f.leases.idleMs, f.dir);
     expect(busy).toContain("Not run: DISPLAY=:91 is in use by a person, through your desktop page link D1, since");
-    expect(busy).toContain("pots page unlink D1 ends it now.");
+    expect(busy).toContain("m1das page unlink D1 ends it now.");
     expect(f.leases.take("x11:local:91", { bot: f.dir, name: "Coworker", agent: "the main agent", conversation: "0" }).ok).toBe(false);
     // A second link cannot start while one is in use.
     const second = await f.desktop.create({ text: "Another step" });

@@ -216,7 +216,7 @@ export class Gateway {
 
   /**
    * Wake the bot for something of its own, such as a child that ended: deliver hands it to the bot inside a wake span,
-   * as a timer does, so pots trace lists it with the agent's run for it.
+   * as a timer does, so m1das trace lists it with the agent's run for it.
    */
   wake(attributes: Record<string, string>, deliver: (caller: TelemetrySpan | undefined) => Promise<Delivered>): Promise<Delivered> {
     const telemetry = this.telemetry;
@@ -343,7 +343,7 @@ export class TimersHandle {
   }
 }
 
-/** The forms the bot stored with pots form add, in promises. */
+/** The forms the bot stored with m1das form add, in promises. */
 export class FormsHandle {
   readonly #run: <A, E>(effect: Effect.Effect<A, E, Services>) => Promise<A>;
 

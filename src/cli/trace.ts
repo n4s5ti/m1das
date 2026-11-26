@@ -5,7 +5,7 @@ import { Argument, Command, Flag } from "effect/cli";
 import { botPaths } from "../bot/definition.ts";
 import { botDir, resolveBot, userError } from "./control.ts";
 
-// pots trace: what the bot did, from the spans in its gw_spans table. A wake has three parts, linked to each other: the
+// m1das trace: what the bot did, from the spans in its gw_spans table. A wake has three parts, linked to each other: the
 // events that woke the bot (one trace each), the wake (its decision and delivery), and the agent's run for it
 // (pi-durable's task phases, the model requests, the tool calls, and what the gateway sent for them).
 

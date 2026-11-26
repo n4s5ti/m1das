@@ -92,7 +92,7 @@ const MACHINE = describeMachine();
 const NO_PROJECT_CONTEXT = "Project-specific instructions and guidelines: none found.";
 const NO_SKILLS = "Skills: none found.";
 /** What the bot says where it was woken when its model fails. */
-const FAILURE_NOTICE = "I could not work on this: my model did not answer. The reason is in pots status on the computer I run on.";
+const FAILURE_NOTICE = "I could not work on this: my model did not answer. The reason is in m1das status on the computer I run on.";
 
 /**
  * One bot: a person with a name, an AGENTS.md, responsibilities, memory, timed wakes, a workspace and one long
@@ -121,7 +121,7 @@ export class Bot implements WakeTarget {
   readonly #control: ControlServer;
   /** Which place each wake submission is about, for "is the bot working on this place". */
   readonly #submissionPlaces = new Map<string, Address>();
-  /** How the last failed run ended, for pots status and pots chat. */
+  /** How the last failed run ended, for m1das status and m1das chat. */
   #lastError: { at: number; error: string } | undefined;
   /**
    * The notices that the agent could not work, by place, until a run works again or the gateway restarts. Without its
@@ -261,7 +261,7 @@ export class Bot implements WakeTarget {
       print,
     });
     const timers = gateway.timers;
-    // A page's answers and a password page's submission wake the bot now, as pots wake does, once per request ID.
+    // A page's answers and a password page's submission wake the bot now, as m1das wake does, once per request ID.
     const pages = await BotPages.open({
       id,
       dir: paths.dir,
@@ -302,7 +302,7 @@ export class Bot implements WakeTarget {
       },
     };
     const skills = { name: "skills", render: () => resources.skills() ?? NO_SKILLS };
-    // MCP servers from pi's mcp.json, which pi and pots mcp share; they connect now, in the background. Read again before
+    // MCP servers from pi's mcp.json, which pi and m1das mcp share; they connect now, in the background. Read again before
     // each request, so a change counts from the next wake.
     const mcp = await Mcp.open({ cwd: paths.workspace, projectTrusted: () => resources.projectTrusted(), env: shellEnv, models: env.models, log: print });
     // pi's code mode, for every agent of the bot; its scripts call the servers' tools.
@@ -609,7 +609,7 @@ export class Bot implements WakeTarget {
   /**
    * Say in each place that woke this run, once until a run works again, that the agent could not work. Not why: the
    * reason can name the model's configuration, such as the command that gives its key, and the place can be shared.
-   * pots status and pots chat show it on this computer.
+   * m1das status and m1das chat show it on this computer.
    */
   #tellFailure(inputs: readonly string[]): void {
     const places = new Set(inputs.map((submission) => this.#submissionPlaces.get(submission)).filter((place) => place !== undefined));

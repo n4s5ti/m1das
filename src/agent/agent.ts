@@ -1113,7 +1113,7 @@ async function childModel(models: Models, model: string): Promise<{ model: Model
   const available = await models.getAvailable(ref.provider);
   if (available.some((each) => each.id === ref.modelId)) return { model: ref };
   if (available.length === 0) {
-    return { refused: `${model} is not signed in on this computer: pi has no login or key for "${ref.provider}". A person signs in with pots login in their terminal; ${list}` };
+    return { refused: `${model} is not signed in on this computer: pi has no login or key for "${ref.provider}". A person signs in with m1das login in their terminal; ${list}` };
   }
   return { refused: `the login for "${ref.provider}" on this computer cannot use ${model}; ${list}` };
 }

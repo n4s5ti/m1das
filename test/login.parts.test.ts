@@ -494,7 +494,7 @@ describe("login pages", { timeout: 60_000 }, () => {
     expect((await http(f, "GET", pathOf(unopened.url), { origin: null })).status).toBe(410);
   });
 
-  it("is taken back with pots page unlink, which stops the sign-in and wakes nobody", async () => {
+  it("is taken back with m1das page unlink, which stops the sign-in and wakes nobody", async () => {
     const { path, cookie, link } = await started(f);
     await http(f, "POST", `${path}login`, { body: { provider: "fake-key", way: "api_key" }, cookie });
     await until(f, path, cookie, (state) => state.login?.question !== undefined, "the question");
@@ -776,7 +776,7 @@ describe("login pages after a restart", { timeout: 60_000 }, () => {
     }
     expect(woke).toEqual([
       {
-        note: "login page: Pots restarted while someone was signing in to fake-device on link G1 (made for test:@alice), so that sign-in was lost and the link ended. A new link (pots page login) lets them try again.",
+        note: "login page: Pots restarted while someone was signing in to fake-device on link G1 (made for test:@alice), so that sign-in was lost and the link ended. A new link (m1das page login) lets them try again.",
         requestId: "login:G1:end",
       },
     ]);

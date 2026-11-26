@@ -81,7 +81,7 @@ export function vncAuthResponse(password: Buffer, challenge: Buffer): Buffer {
 const PASSWD_FILE_KEY = Buffer.from("e84ad660c4721ae0", "hex");
 
 /**
- * The VNC password in a file: KEY=value lines with VNC_PASSWORD, as pots page secret writes them, or a password file
+ * The VNC password in a file: KEY=value lines with VNC_PASSWORD, as m1das page secret writes them, or a password file
  * as vncpasswd, x11vnc -storepasswd and TightVNC write it (8 bytes, encrypted with VNC's fixed key). VNC uses the first
  * 8 bytes of a password.
  */

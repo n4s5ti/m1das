@@ -6,7 +6,7 @@ If you are here to change Pots' own code, read [AGENTS.md](../AGENTS.md) instead
 
 ## What Pots is
 
-Pots (the npm package `pi-durable-bot`, the command `pots`) is an open-source AI coworker. It lives on a computer of its own and works in the chat apps a team already uses. It is not a chat bot that answers when someone @s it:
+Pots (the npm package `pi-durable-bot`, the command `m1das`) is an open-source AI coworker. It lives on a computer of its own and works in the chat apps a team already uses. It is not a chat bot that answers when someone @s it:
 
 - **It sees everything in the places it is invited to.** That covers channel messages that never mention it, DMs, edits, reactions and people joining. All of it goes into one local SQLite log, and the bot reads that log with SQL when it needs context.
 - **It decides when to act.** A mention or a DM wakes it at once. Every other message comes to it too, and it decides whether it is about its work; a judge can read those first and ask "is this about me, and should I respond?", using the bot's own list of responsibilities. The bot also sets its own timed wakes, such as "check Acme's pricing every Monday", and keeps them. Being woken does not mean speaking: most of the time the right answer is to stay quiet.
@@ -15,15 +15,15 @@ Pots (the npm package `pi-durable-bot`, the command `pots`) is an open-source AI
 - **It survives crashes.** Every step is journaled ([pi-durable](https://github.com/earendil-works/pi)). Every incoming event is on disk before it is acknowledged. Every outgoing message has a send ID, so the bot never sends the same message twice (on Telegram and Teams, a crash at the moment of a send can repeat it).
 - **It is open and yours.** It is MIT-licensed and runs on the person's own machine. It can use a subscription they already pay for (ChatGPT, Claude, GitHub Copilot, Grok, Kimi and more), an API key from any of 40+ providers, or a local model (Ollama, LM Studio, llama.cpp). The data stays on their machine, in each bot's folder. One machine can run several bots, each with its own name, persona and memory.
 
-Slack, Discord and Telegram work today, and so does the person's own terminal (`pots chat`). Microsoft Teams works as a preview: tested with fakes and Microsoft 365 Agents Playground, not yet in a real organisation. It needs a work or school Microsoft 365 account, and an admin may have to allow custom apps first; the bot connects it with Microsoft's Teams CLI, and the person only signs in with a code on their phone and adds the app in Teams. Email is next. The [README](../README.md) has the full picture, a demo video and diagrams.
+Slack, Discord and Telegram work today, and so does the person's own terminal (`m1das chat`). Microsoft Teams works as a preview: tested with fakes and Microsoft 365 Agents Playground, not yet in a real organisation. It needs a work or school Microsoft 365 account, and an admin may have to allow custom apps first; the bot connects it with Microsoft's Teams CLI, and the person only signs in with a code on their phone and adds the app in Teams. Email is next. The [README](../README.md) has the full picture.
 
 ## The one thing to get right: the bot sets itself up
 
 Once the bot is made, **it connects its chat apps itself**. For each app, it creates what that platform needs (on Slack, a Slack app), gets the tokens, writes its own `bot.json` and asks the person only for what it cannot do, such as signing in or approving an install.
 
-So do not create the chat app (such as a Slack app), write a manifest, collect tokens or edit `~/.pots/` by hand for your person, and do not tell them to do any of that first. Your job is to install Pots and make the bot, as below. After that, hand the person over to their bot: they say "join our Slack" in `pots chat`, and the bot does the rest.
+So do not create the chat app (such as a Slack app), write a manifest, collect tokens or edit `~/.pots/` by hand for your person, and do not tell them to do any of that first. Your job is to install Pots and make the bot, as below. After that, hand the person over to their bot: they say "join our Slack" in `m1das chat`, and the bot does the rest.
 
-The same goes for its other tools: the bot adds its own routines, and skills for the command line tools it uses. Run `pots mcp add` only when your person asks for an MCP server; they sign in to it with `pots mcp login <server>` in their own terminal.
+The same goes for its other tools: the bot adds its own routines, and skills for the command line tools it uses. Run `m1das mcp add` only when your person asks for an MCP server; they sign in to it with `m1das mcp login <server>` in their own terminal.
 
 On a computer without a desktop, such as a cloud server reached over SSH, the bot still does this. It explains the choices and lets the person pick:
 
@@ -31,72 +31,80 @@ On a computer without a desktop, such as a cloud server reached over SSH, the bo
 - a browser-only tool, which is lighter but cannot be watched;
 - the person clicks through a few browser steps on their own computer while the bot guides them.
 
-When it needs tokens the person copied, it asks for them in `pots chat` with hidden input, and they go straight to the secrets folder.
+When it needs tokens the person copied, it asks for them in `m1das chat` with hidden input, and they go straight to the secrets folder.
 
 ## Before you start
 
-- **The bot gets full control of the computer it runs on**, as the user who runs `pots init`. It runs commands, installs software and uses the screen, with no approval step. Tell your person this, recommend a computer or VM of its own, and go on only when they agree: `pots init --yes` accepts it for them.
+- **The bot gets full control of the computer it runs on**, as the user who runs `m1das init`. It runs commands, installs software and uses the screen, with no approval step. Tell your person this, recommend a computer or VM of its own, and go on only when they agree: `m1das init --yes` accepts it for them.
 - **Set it up on the computer where the bot will live.** If your person reaches a server over SSH, the commands run there, not on their laptop.
 - **Requirements:** Node.js 24 or newer, on macOS, Linux or Windows. Windows also needs [Git for Windows](https://git-scm.com/download/win).
 
 ## Set it up
 
-Do the setup yourself, in your own shell. Only one step is your person's: signing in to the model the bot thinks with and, when it will be in group chats, a judge. A subscription sign-in opens their browser, and an API key must not pass through your conversation, so they do it in their own terminal with `pots login`.
+Do the setup yourself, in your own shell. Only one step is your person's: signing in to the model the bot thinks with and, when it will be in group chats, a judge. A subscription sign-in opens their browser, and an API key must not pass through your conversation, so they do it in their own terminal with `m1das login`.
 
-1. **Install:** `npm install -g pi-durable-bot`.
-2. **See what pi can use already:** `pots login --list`. It lists the models (for `--model`) and judges (for `--judge`) that have a login, a key or a local server on this computer, and never shows a secret.
+1. **Install from the fork checkout:**
+   ```sh
+   git clone https://github.com/n4s5ti/m1das.git
+   cd m1das
+   npm install
+   npm link
+   ```
+2. **See what pi can use already:** `m1das login --list`. It lists the models (for `--model`) and judges (for `--judge`) that have a login, a key or a local server on this computer, and never shows a secret.
 3. **Ask your person**, in your chat, only what `--list` cannot answer:
    - the bot's name;
    - in one sentence, what it is for (optional; the bot asks them later if they skip it);
    - which model the bot thinks with, when the list has nothing they want. It is the bot's brain: it reads, decides and does the work with it. Usually it is the subscription they already pay for and use every day (ChatGPT, Claude, GitHub Copilot, Grok, Kimi and more); it can also be an API key from a provider, or a local model server (Ollama, LM Studio, llama.cpp, vLLM);
    - who decides whether a group message that does not mention the bot wakes it: the bot itself (the default: every such message wakes it, and its own model reads it), or a judge, a fast model that reads each such message first and wakes the bot only for messages about its work. Jev, from TypeSafe, is one; it needs their TypeSafe API key. Do not ask when the bot will not be in group chats: use `--judge off`.
-4. **If something they chose is not listed, they sign in with `pots login`, once, for all of it.** Do not just give them the command. First tell them in your chat what they will add and why: the subscription they use every day, for the bot to think with, and a judge such as Jev, when the bot will be in group chats. The menu of `pots login` has "Sign in with a subscription", "Use an API key" and "Done".
+4. **If something they chose is not listed, they sign in with `m1das login`, once, for all of it.** Do not just give them the command. First tell them in your chat what they will add and why: the subscription they use every day, for the bot to think with, and a judge such as Jev, when the bot will be in group chats. The menu of `m1das login` has "Sign in with a subscription", "Use an API key" and "Done".
 
-   `pots login` takes each key with hidden input and does not take an empty one. It tries each model and judge, says that it is ready or why not, and comes back to its menu, so both go in one run; "Done" lists what pi can use. On a computer without a browser, such as a server over SSH, a sign-in prints a link and asks for the code the page shows (choose "Copy code login (headless)" when it is offered). Then run `pots login --list` again.
+   `m1das login` takes each key with hidden input and does not take an empty one. It tries each model and judge, says that it is ready or why not, and comes back to its menu, so both go in one run; "Done" lists what pi can use. On a computer without a browser, such as a server over SSH, a sign-in prints a link and asks for the code the page shows (choose "Copy code login (headless)" when it is offered). Then run `m1das login --list` again.
 
-   When your person will not use a terminal on that computer, run `pots login --link` yourself and give them the link it prints. They open it on their phone or another computer, press Start, and sign in there: with a subscription (the page puts a device code or a copy code first), or with an API key, also TypeSafe's. They can add several, then press Done. It needs no bot yet. The command serves the page until they press Done, or 15 minutes after Start (an hour unopened), prints each login and then what pi can use, so wait for it to end. Without a `publicUrl` in `~/.pots/settings.json`, the link goes through a Cloudflare Quick Tunnel and the command says so: Cloudflare can see what is typed on the page. A device code is safe there. Tell them that a copy code or a pasted address, and an API key typed there, are not private: with them Cloudflare could finish the sign-in or use the key.
+   When your person will not use a terminal on that computer, run `m1das login --link` yourself and give them the link it prints. They open it on their phone or another computer, press Start, and sign in there: with a subscription (the page puts a device code or a copy code first), or with an API key, also TypeSafe's. They can add several, then press Done. It needs no bot yet. The command serves the page until they press Done, or 15 minutes after Start (an hour unopened), prints each login and then what pi can use, so wait for it to end. Without a `publicUrl` in `~/.pots/settings.json`, the link goes through a Cloudflare Quick Tunnel and the command says so: Cloudflare can see what is typed on the page. A device code is safe there. Tell them that a copy code or a pasted address, and an API key typed there, are not private: with them Cloudflare could finish the sign-in or use the key.
+
 5. **Make the bot:**
    ```sh
-   pots init --yes --name "Ada" --model openai/gpt-6.2-sol --about "our team's research and ops assistant" --no-chat
+   m1das init --yes --name "Ada" --model openai/gpt-6.2-sol --about "our team's research and ops assistant" --no-chat
    ```
-   For `--model`, take the newest strong model of your person's provider from `pots login --list`, and tell them which one you chose. Use `--judge off` when the bot will not be in group chats, and `--judge typesafe/jev-latest` for Jev. `pots init` tries the model and the judge before it makes the bot, then starts the gateway as a background service (launchd on macOS, a systemd user service on Linux, Task Scheduler on Windows). On Linux it turns on lingering for the user (with `sudo` when the system asks for it), so the bot keeps running after your person logs out of SSH; `pots init --system` installs a system service instead (it needs sudo). Each Linux user has one Pots service: one gateway process that runs all of that user's bots (`pots bot new` adds more). On a computer that several people use, each user runs their own, with a user service of their own.
-6. **Check, then hand over:** `pots chat --bot <id> -m "hi" --timeout 60` must print the bot's answer; `<id>` is the folder name in the `Created …/bots/<id>` line of `pots init`. If no answer comes, see `pots status` and `pots service logs`. Then tell your person to run `pots chat` to meet the bot. It says hello, checks the screen and asks which chat apps to join.
+   For `--model`, take the newest strong model of your person's provider from `m1das login --list`, and tell them which one you chose. Use `--judge off` when the bot will not be in group chats, and `--judge typesafe/jev-latest` for Jev. `m1das init` tries the model and the judge before it makes the bot, then starts the gateway as a background service (launchd on macOS, a systemd user service on Linux, Task Scheduler on Windows). On Linux it turns on lingering for the user (with `sudo` when the system asks for it), so the bot keeps running after your person logs out of SSH; `m1das init --system` installs a system service instead (it needs sudo). Each Linux user has one Pots service: one gateway process that runs all of that user's bots (`m1das bot new` adds more). On a computer that several people use, each user runs their own, with a user service of their own.
 
-A person without an AI agent runs `pots init` alone instead: it asks the same things in the terminal, signs in, and opens the chat at the end.
+6. **Check, then hand over:** `m1das chat --bot <id> -m "hi" --timeout 60` must print the bot's answer; `<id>` is the folder name in the `Created …/bots/<id>` line of `m1das init`. If no answer comes, see `m1das status` and `m1das service logs`. Then tell your person to run `m1das chat` to meet the bot. It says hello, checks the screen and asks which chat apps to join.
+
+A person without an AI agent runs `m1das init` alone instead: it asks the same things in the terminal, signs in, and opens the chat at the end.
 
 ## After setup
 
 Tell your person:
 
-- **Talk to the bot:** `pots chat`. Leave with Ctrl+C; the bot keeps working.
+- **Talk to the bot:** `m1das chat`. Leave with Ctrl+C; the bot keeps working.
 - **Tell it where to work.** For example, "join our Slack". It sets the app up itself. Then invite it to the right channels (`/invite @its-name`). Like a new hire, it joins only the places it is invited to.
 - **Which models do which work is theirs to say.** The bot talks at `medium` thinking and hands longer work to children at `xhigh` or `max`, on its own model unless it chooses another one for a child. At its first start it asks your person which models they want for which work, and keeps the answer in its AGENTS.md.
-- **Sign in from anywhere.** When a login expires, or they want another model or Jev, they ask the bot, for example "sign me in to Claude". It sends a one-time link to a login page of Pots' own, where they sign in from any device; the bot is told which models it can use, never the login. When the bot cannot think because its only login expired, `pots login --link` on its computer prints such a link.
+- **Sign in from anywhere.** When a login expires, or they want another model or Jev, they ask the bot, for example "sign me in to Claude". It sends a one-time link to a login page of Pots' own, where they sign in from any device; the bot is told which models it can use, never the login. When the bot cannot think because its only login expired, `m1das login --link` on its computer prints such a link.
 - **Change it by talking to it.** Its persona, responsibilities, model and judge live in its folder, `~/.pots/bots/<id>/`, and the bot edits them itself. People can edit them too; changes apply within seconds.
 
 | Command | What it does |
 |---|---|
-| `pots login` | Sign in to models and judges, or add API keys or local servers, one after another (in a terminal); `--list` shows what can be used; `--link` prints a link to a login page for any device instead |
-| `pots mcp add` / `list` / `remove` | MCP servers for every bot and pi on this computer, in pi's `~/.pi/agent/mcp.json`, with the options of `pi mcp` (`pots mcp --help`); the bot calls their tools from code mode scripts: short JavaScript programs it writes to call its tools |
-| `pots mcp login <server>` | Sign in to an MCP server in the browser (in a terminal) |
-| `pots status` | The gateway, the service and each bot |
-| `pots service logs` | The gateway's output |
-| `pots trace` | What a bot did: its last wakes, or one wake from its events to the messages it sent |
-| `pots routine list` | The work a bot repeats on a schedule, with each routine's next time and last run |
-| `pots bot new` / `pots bot list` | More bots on the same computer ([below](#add-another-bot)) |
-| `npm install -g pi-durable-bot@latest`, then `pots service restart` | Upgrade |
-| `pots service uninstall`, then `npm uninstall -g pi-durable-bot` | Remove it. The bots stay in `~/.pots/` until that folder is deleted. So does the screen lease file, `/tmp/pots-screens-<uid>.sqlite` (on Windows, `pots-screens.sqlite` in the temporary folder) |
+| `m1das login` | Sign in to models and judges, or add API keys or local servers, one after another (in a terminal); `--list` shows what can be used; `--link` prints a link to a login page for any device instead |
+| `m1das mcp add` / `list` / `remove` | MCP servers for every bot and pi on this computer, in pi's `~/.pi/agent/mcp.json`, with the options of `pi mcp` (`m1das mcp --help`); the bot calls their tools from code mode scripts: short JavaScript programs it writes to call its tools |
+| `m1das mcp login <server>` | Sign in to an MCP server in the browser (in a terminal) |
+| `m1das status` | The gateway, the service and each bot |
+| `m1das service logs` | The gateway's output |
+| `m1das trace` | What a bot did: its last wakes, or one wake from its events to the messages it sent |
+| `m1das routine list` | The work a bot repeats on a schedule, with each routine's next time and last run |
+| `m1das bot new` / `m1das bot list` | More bots on the same computer ([below](#add-another-bot)) |
+| From the checkout: `git pull`, `npm install`, `npm link`, then `m1das service restart` | Upgrade |
+| `m1das service uninstall`, then `npm unlink -g m1das` | Remove it. The bots stay in `~/.pots/` until that folder is deleted. So does the screen lease file, `/tmp/pots-screens-<uid>.sqlite` (on Windows, `pots-screens.sqlite` in the temporary folder) |
 
 ## Add another bot
 
 One computer can run several bots, each with its own name, persona, memory and chat apps, for example one for the team's support and one for marketing. There are two ways to add one:
 
-- **Your person asks a bot they already have**, for example "make us a marketing bot". That bot runs `pots bot new` itself. Until the new bot has joined a chat app, the bot that made it passes messages between them with `pots chat`, so your person can stay in the chat app where they asked.
+- **Your person asks a bot they already have**, for example "make us a marketing bot". That bot runs `m1das bot new` itself. Until the new bot has joined a chat app, the bot that made it passes messages between them with `m1das chat`, so your person can stay in the chat app where they asked.
 - **You run it**, the way you made the first one:
   ```sh
-  pots bot new "Bloom" --about "marketing for our product" --model openai/gpt-6.2-sol
+  m1das bot new "Bloom" --about "marketing for our product" --model openai/gpt-6.2-sol
   ```
-  Choose the model as in step 5 above. When the gateway runs, `pots bot new` waits until the bot has started, and prints its folder; the folder name is its ID. Check it with `pots chat --bot <id> -m "hi" --timeout 60`, then tell your person to meet it with `pots chat --bot <id>`.
+  Choose the model as in step 5 above. When the gateway runs, `m1das bot new` waits until the bot has started, and prints its folder; the folder name is its ID. Check it with `m1das chat --bot <id> -m "hi" --timeout 60`, then tell your person to meet it with `m1das chat --bot <id>`.
 
 Either way, the new bot sets itself up as the first one did. It says hello, checks the screen, connects the chat apps your person wants, as an app of its own with a token file of its own, and asks which models to use for which work. When another bot already uses the screen, it tells your person that bots on one screen wait for each other, and offers to set up a screen of its own. On Linux that is a virtual desktop with its own browser: about 0.5–1 GB of memory, and a one-time install of packages with sudo when none is installed yet. On macOS and Windows a second screen is not practical, so the bots take turns.
 
@@ -104,8 +112,8 @@ A real example: on 2026-11-14, Probe, the bot that develops Pots, made Bloom, a 
 
 ## When something goes wrong
 
-- `pots status` shows whether the gateway runs and each bot's state. When the bot cannot use its model, which is usually a model login, it says "I could not work on this" in the place that woke it; `pots status` and `pots chat` show why.
-- `pots children` lists the children a bot started for longer work in the background, and `pots children --stop <id>` or `--stop-all` stops them; a stopped child reports nothing.
+- `m1das status` shows whether the gateway runs and each bot's state. When the bot cannot use its model, which is usually a model login, it says "I could not work on this" in the place that woke it; `m1das status` and `m1das chat` show why.
+- `m1das children` lists the children a bot started for longer work in the background, and `m1das children --stop <id>` or `--stop-all` stops them; a stopped child reports nothing.
 - If a bot's `bot.json` has an error, the reason is in `bot.json.error` next to it, and the old definition stays in use.
-- `pots service logs` and `pots trace` show what happened.
-- Report bugs at https://github.com/Crokily/pi-durable-bot/issues.
+- `m1das service logs` and `m1das trace` show what happened.
+- Report bugs at https://github.com/n4s5ti/m1das/issues.

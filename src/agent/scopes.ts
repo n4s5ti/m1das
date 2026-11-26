@@ -76,7 +76,7 @@ async function detect(home: string): Promise<ScopeSupport | undefined> {
   const slice = `app-pots-${key}.slice`;
   // The same options as every command's, so an older systemd that lacks one leaves commands as they were.
   try {
-    await execFileAsync(systemdRun, ["--user", "--scope", "--quiet", "--collect", `--slice=${slice}`, "--description=Pots: checks that commands can run in scopes", "--", bash, "-c", "true"], {
+    await execFileAsync(systemdRun, ["--user", "--scope", "--quiet", "--collect", `--slice=${slice}`, "--description=m1das: checks that commands can run in scopes", "--", bash, "-c", "true"], {
       timeout: 10_000,
     });
   } catch {

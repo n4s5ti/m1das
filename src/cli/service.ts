@@ -26,7 +26,7 @@ export interface ServiceManager {
 
 export class Service extends Context.Service<Service, ServiceManager>()("pots/Service") {}
 
-/** What the service runs: this node, this package's `pots start`, and the PATH of the person who installs it. */
+/** What the service runs: this node, this package's `m1das start`, and the PATH of the person who installs it. */
 const gateway = {
   node: process.execPath,
   entry: fileURLToPath(new URL(`./pots${import.meta.url.slice(import.meta.url.lastIndexOf("."))}`, import.meta.url)),
@@ -206,7 +206,7 @@ export function systemdManager(files = { user: userUnit, system: systemUnit }, e
         mkdirSync(POTS_HOME, { recursive: true });
         if (system) {
           const other = otherUser();
-          if (other) return yield* Effect.fail(userError(`a system service of user ${other} is installed (${files.system}); use a user service: pots service install`));
+          if (other) return yield* Effect.fail(userError(`a system service of user ${other} is installed (${files.system}); use a user service: m1das service install`));
           if (existsSync(files.user)) yield* manager.uninstall();
           yield* exec("sudo", ["tee", files.system], { input: unitText(true) });
           yield* exec("sudo", ["systemctl", "daemon-reload"]);
@@ -214,7 +214,7 @@ export function systemdManager(files = { user: userUnit, system: systemUnit }, e
           yield* exec("sudo", ["systemctl", "restart", "pots.service"]);
           return;
         }
-        if (ownSystem()) return yield* Effect.fail(userError(`a system service is installed (${files.system}); use pots service install --system, or uninstall it first`));
+        if (ownSystem()) return yield* Effect.fail(userError(`a system service is installed (${files.system}); use m1das service install --system, or uninstall it first`));
         mkdirSync(dirname(files.user), { recursive: true });
         writeFileSync(files.user, unitText(false));
         yield* exec("systemctl", ["--user", "daemon-reload"]);
@@ -241,7 +241,7 @@ export function systemdManager(files = { user: userUnit, system: systemUnit }, e
           yield* exec("systemctl", ["--user", "daemon-reload"]);
         }
       }),
-    // After an upgrade people run pots service restart, so it also brings a unit that an older version wrote up to date.
+    // After an upgrade people run m1das service restart, so it also brings a unit that an older version wrote up to date.
     restart: () =>
       Effect.gen(function* () {
         if (ownSystem()) {

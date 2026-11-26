@@ -99,7 +99,7 @@ async function storeOldChildExtensions(): Promise<number> {
 }
 /** The text of a section, as the request shows it last. */
 const section = (request: FakeRequest, name: string) => request.system.split(`<${name}>\n`).at(-1)!.split(`\n</${name}>`)[0]!;
-/** pots mcp against the gateway's pi folder. */
+/** m1das mcp against the gateway's pi folder. */
 const mcp = (...args: string[]) => gateway.run(["mcp", ...args], { env: { PI_CODING_AGENT_DIR: join(gateway.home, "pi") } });
 
 /**
@@ -152,14 +152,14 @@ describe("code mode and MCP servers", { timeout: 90_000 }, () => {
     expect(section(child, "mcp_servers")).toBe("MCP servers whose tools are not declared to you: none.");
   });
 
-  it("calls a server that pots mcp added while the bot runs, and keeps the tools and the start of the prompt of every request", async () => {
+  it("calls a server that m1das mcp added while the bot runs, and keeps the tools and the start of the prompt of every request", async () => {
     await setUp({ laterSystemMessages: true });
     gateway.say("general", "alice", `@${ME} hello`);
     await waitFor(() => gateway.sent().length === 1, { what: "the reply" });
 
     const added = await mcp("add", "shouter", "--", process.execPath, SERVER);
     expect(added.stderr).toBe("");
-    expect(added.stdout).toBe(`Added global MCP server "shouter" in ${join(gateway.home, "pi", "mcp.json")}.\nCheck it with: pots mcp list\n`);
+    expect(added.stdout).toBe(`Added global MCP server "shouter" in ${join(gateway.home, "pi", "mcp.json")}.\nCheck it with: m1das mcp list\n`);
     gateway.say("general", "alice", `@${ME} please shout`);
     const shouted = () => mainRequests().find((request) => request.messages.at(-1)?.role === "tool" && request.messages.at(-1)!.content.includes("HELLO!"));
     await waitFor(() => shouted() !== undefined, { what: "the script's result" });
@@ -260,11 +260,11 @@ describe("code mode and MCP servers", { timeout: 90_000 }, () => {
     expect(section(first()!, "mcp_servers")).not.toContain("mcp__shouter");
   });
 
-  it("adds, lists and removes servers with pots mcp, in pi's mcp.json", async () => {
+  it("adds, lists and removes servers with m1das mcp, in pi's mcp.json", async () => {
     model = await startFakeModel(script);
     gateway = new TestGateway({ model });
     const file = join(gateway.home, "pi", "mcp.json");
-    expect((await mcp("--help")).stdout).toMatch(/^Usage:\n {2}pots mcp add <server> \[options\] -- <command> \[args\.\.\.\]\n/);
+    expect((await mcp("--help")).stdout).toMatch(/^Usage:\n {2}m1das mcp add <server> \[options\] -- <command> \[args\.\.\.\]\n/);
     expect((await mcp("list")).stdout).toBe(`No MCP servers configured. Add them to ${file} or .pi/mcp.json.\n`);
 
     expect((await mcp("add", "shouter", "--description", "Shouts", "--", process.execPath, SERVER)).status).toBe(0);
@@ -282,7 +282,7 @@ describe("code mode and MCP servers", { timeout: 90_000 }, () => {
     expect((await mcp("list")).stdout).toBe(`No MCP servers configured. Add them to ${file} or .pi/mcp.json.\n`);
   });
 
-  it("names pots login, not pi's commands, for a server that signs in with a pi login", async () => {
+  it("names m1das login, not pi's commands, for a server that signs in with a pi login", async () => {
     model = await startFakeModel(script);
     gateway = new TestGateway({ model });
     // A server that wants a sign-in, as one does before the pi login exists.
@@ -294,13 +294,13 @@ describe("code mode and MCP servers", { timeout: 90_000 }, () => {
       writeFileSync(join(gateway.home, "pi", "mcp.json"), JSON.stringify({ mcpServers: { radius: { url, auth: { provider: "example" } } } }));
 
       const listed = await mcp("list");
-      expect(listed.stdout).toBe(`radius: needs sign-in (codemode, global)\n  ${url}\n  sign in with: pots login (provider example)\n`);
+      expect(listed.stdout).toBe(`radius: needs sign-in (codemode, global)\n  ${url}\n  sign in with: m1das login (provider example)\n`);
       const login = await mcp("login", "radius");
       expect(login.status).toBe(1);
-      expect(login.stderr).toBe('MCP server "radius" uses the credentials of provider "example". Sign in to it with "pots login" (provider example).\n');
+      expect(login.stderr).toBe('MCP server "radius" uses the credentials of provider "example". Sign in to it with "m1das login" (provider example).\n');
       const logout = await mcp("logout", "radius");
       expect(logout.status).toBe(1);
-      expect(logout.stderr).toBe('MCP server "radius" uses the credentials of provider "example". pots mcp logout does not sign out of it.\n');
+      expect(logout.stderr).toBe('MCP server "radius" uses the credentials of provider "example". m1das mcp logout does not sign out of it.\n');
     } finally {
       server.closeAllConnections();
       await new Promise((resolve) => server.close(resolve));
@@ -317,7 +317,7 @@ describe("code mode and MCP servers", { timeout: 90_000 }, () => {
 
     // No note that the file is ignored. pi names it by the folder as the system gives it, a real path on macOS.
     const added = await inFolder(workspace, "add", "--local", "shouter", "--", process.execPath, SERVER);
-    expect(added.stdout).toMatch(/^Added project MCP server "shouter" in .+[\\/]workspace[\\/]\.pi[\\/]mcp\.json\.\nCheck it with: pots mcp list\n$/);
+    expect(added.stdout).toMatch(/^Added project MCP server "shouter" in .+[\\/]workspace[\\/]\.pi[\\/]mcp\.json\.\nCheck it with: m1das mcp list\n$/);
     const listed = await inFolder(workspace, "list");
     expect(listed.status).toBe(0);
     expect(listed.stdout).toBe(`shouter: connected, 1 tool (codemode, project)\n  ${process.execPath} ${SERVER}\n  tools: shout\n`);

@@ -1,16 +1,16 @@
 {
-  "name": "pi-durable-bot",
+  "name": "m1das",
   "version": "0.8.8",
   "description": "Open-source AI coworkers that read every channel, decide what matters, and act on their own computer. Self-hosted, any model.",
   "license": "MIT AND MPL-2.0",
   "type": "module",
-  "homepage": "https://github.com/Crokily/pi-durable-bot#readme",
+  "homepage": "https://github.com/n4s5ti/m1das#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Crokily/pi-durable-bot.git"
+    "url": "git+https://github.com/n4s5ti/m1das.git"
   },
   "bugs": {
-    "url": "https://github.com/Crokily/pi-durable-bot/issues"
+    "url": "https://github.com/n4s5ti/m1das/issues"
   },
   "keywords": [
     "ai-agent",
@@ -23,7 +23,7 @@
     "pi-package"
   ],
   "bin": {
-    "pots": "dist/cli/pots.js"
+    "m1das": "dist/cli/pots.js"
   },
   "files": [
     "dist",
@@ -39,14 +39,14 @@
     "skills": [
       "./pi-package/skills"
     ],
-    "video": "https://github.com/Crokily/pi-durable-bot/raw/refs/heads/main/docs/media/demo.mp4"
+    "video": "https://github.com/n4s5ti/m1das/raw/refs/heads/main/docs/media/demo.mp4"
   },
   "engines": {
     "node": ">=24"
   },
   "scripts": {
     "start": "node src/cli/pots.ts start",
-    "pots": "node src/cli/pots.ts",
+    "m1das": "node src/cli/pots.ts",
     "check": "tsc --noEmit",
     "test": "vitest run",
     "tla": "node scripts/tlc.ts",

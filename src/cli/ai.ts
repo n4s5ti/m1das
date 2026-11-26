@@ -6,7 +6,7 @@ import { type Context, Console, Effect, Redacted, Terminal } from "effect";
 import { Prompt } from "effect/cli";
 import { userError } from "./control.ts";
 
-// Step 2 of pots init, and pots login: give the bot an AI. Logins, keys and endpoints are pi's own (~/.pi/agent, or
+// Step 2 of m1das init, and m1das login: give the bot an AI. Logins, keys and endpoints are pi's own (~/.pi/agent, or
 // PI_CODING_AGENT_DIR), so the pi command line and every bot on this machine share them.
 
 type Way = "existing" | "oauth" | "api_key" | "local" | "done";
@@ -33,8 +33,8 @@ export const setUpModel = (models: Models) =>
   });
 
 /**
- * pots login: sign in with subscriptions, add API keys or local servers, one after another, until the person chooses
- * Done. After each, say what can be used with it, or why it failed: a model, chosen and tried as pots init does, or
+ * m1das login: sign in with subscriptions, add API keys or local servers, one after another, until the person chooses
+ * Done. After each, say what can be used with it, or why it failed: a model, chosen and tried as m1das init does, or
  * the judges of a provider that has only judges, such as TypeSafe's Jev, tried with one message.
  */
 export const signIn = (models: Models) =>
@@ -42,12 +42,12 @@ export const signIn = (models: Models) =>
     for (let first = true; ; first = false) {
       const way = yield* chooseWay(first ? "How should your bot get its AI?" : "What next?", 0, true);
       if (way === "done") return;
-      if (way === "existing") return yield* Effect.die(new Error("pots login does not offer the models pi has already"));
+      if (way === "existing") return yield* Effect.die(new Error("m1das login does not offer the models pi has already"));
       const outcome = yield* setUpWay(models, way);
       if ("model" in outcome) {
-        yield* Console.log(`\nReady: ${outcome.model}. A new bot can think with it: pots init --model ${outcome.model}\n`);
+        yield* Console.log(`\nReady: ${outcome.model}. A new bot can think with it: m1das init --model ${outcome.model}\n`);
       } else if ("judges" in outcome) {
-        yield* Console.log(`\nReady as a judge: ${outcome.judges.join(", ")}. A new bot can use it: pots init --judge ${outcome.judges[0]}\n`);
+        yield* Console.log(`\nReady as a judge: ${outcome.judges.join(", ")}. A new bot can use it: m1das init --judge ${outcome.judges[0]}\n`);
       } else {
         yield* Console.log(`\n${outcome.failed}\n`);
       }
@@ -142,7 +142,7 @@ export const checkModel = (models: Models, model: string) =>
       return error === undefined ? model : yield* Effect.fail(userError(`${model} cannot be used with this login: ${error}`));
     }
     if (available.length === 0) {
-      return yield* Effect.fail(userError(`${model} cannot be used: pi has no login or key for "${provider}" on this computer. Run pots login in a terminal to sign in or add a key.`));
+      return yield* Effect.fail(userError(`${model} cannot be used: pi has no login or key for "${provider}" on this computer. Run m1das login in a terminal to sign in or add a key.`));
     }
     const ids = available.map((item) => item.id);
     return yield* Effect.fail(userError(`${model} cannot be used: "${provider}" has no model "${id}". It has: ${ids.slice(0, 8).join(", ")}${ids.length > 8 ? ", …" : ""}`));
@@ -184,7 +184,7 @@ const chooseModel = (models: Models, available: readonly Model<Api>[], piDefault
     }
   });
 
-/** pi's model layer, loaded when it is needed, so pots starts fast. */
+/** pi's model layer, loaded when it is needed, so m1das starts fast. */
 const piModels = () => import("../agent/models.ts");
 
 /** Ask the model for a word. The reason it cannot answer, or undefined when it can. */
@@ -216,7 +216,7 @@ const tryLogin = (models: Models, providerId: string, type: AuthType) =>
 const JEV = "typesafe/jev-latest";
 
 /**
- * Step 3 of pots init: who decides whether a group message that does not mention the bot wakes it. The bot itself
+ * Step 3 of m1das init: who decides whether a group message that does not mention the bot wakes it. The bot itself
  * ("off": every such message wakes it), Jev with the person's TypeSafe API key, or a judge model already set up in pi.
  * The chosen judge is tried with one message first; one that cannot answer is not kept. When Jev could not answer,
  * choosing it again asks for a key again: the one pi has may be wrong or revoked.
@@ -265,7 +265,7 @@ export const checkJudge = (models: Models, judge: string, mainModel: string) =>
     const provider = judge.slice(0, judge.indexOf("/"));
     const known = models.getProviders().some((item) => item.id === provider);
     if (known && (yield* Effect.promise(() => models.getAvailableOfType("classifier", provider))).length === 0) {
-      return yield* Effect.fail(userError(`${judge} cannot be used as the judge: pi has no key for "${provider}" on this computer. Run pots login in a terminal to add one.`));
+      return yield* Effect.fail(userError(`${judge} cannot be used as the judge: pi has no key for "${provider}" on this computer. Run m1das login in a terminal to add one.`));
     }
     const error = yield* tryJudge(models, judge, mainModel);
     return error === undefined ? judge : yield* Effect.fail(userError(`${judge} cannot be used as the judge: ${error}`));

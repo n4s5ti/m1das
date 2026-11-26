@@ -10,7 +10,7 @@ import { chatInteractive } from "./chat.ts";
 import { listBots, userError } from "./control.ts";
 import { Service } from "./service.ts";
 
-// pots init: 1 create your first bot, 2 give it an AI, 3 choose who decides on group messages that do not mention it
+// m1das init: 1 create your first bot, 2 give it an AI, 3 choose who decides on group messages that do not mention it
 // (the bot itself by default), 4 say in one sentence what it is for (optional), 5 talk to it in this terminal.
 // Everything else, such as joining chat apps, the bot does itself on this computer, asking only for what it cannot do,
 // like signing in.
@@ -37,7 +37,7 @@ export const initCommand = Command.make(
     ),
     about: Flag.String("about").pipe(Flag.optional, Flag.withDescription("One sentence: what the bot is for.")),
     yes: Flag.Boolean("yes").pipe(Flag.withDefault(false), Flag.withDescription("Accept that the bot gets full control of this computer.")),
-    noService: Flag.Boolean("no-service").pipe(Flag.withDefault(false), Flag.withDescription("Do not install the background service; run pots start yourself.")),
+    noService: Flag.Boolean("no-service").pipe(Flag.withDefault(false), Flag.withDescription("Do not install the background service; run m1das start yourself.")),
     noChat: Flag.Boolean("no-chat").pipe(Flag.withDefault(false), Flag.withDescription("Do not open the chat at the end.")),
     system: Flag.Boolean("system").pipe(Flag.withDefault(false), Flag.withDescription("Linux: install a system service (needs sudo) instead of a user service.")),
   },
@@ -47,8 +47,8 @@ export const initCommand = Command.make(
       const ask = <A>(prompt: Prompt.Prompt<A>, missing: string) => (interactive ? Prompt.run(prompt) : Effect.fail(userError(`${missing} (no terminal to ask in)`)));
       const user = userInfo().username;
 
-      yield* Console.log("Pots: an AI coworker that lives on this computer.");
-      if (gitBashMissing()) return yield* Effect.fail(userError("Pots runs bash commands with Git Bash on Windows. Install Git for Windows (https://git-scm.com/download/win), then run pots init again."));
+      yield* Console.log("m1das: an AI coworker that lives on this computer.");
+      if (gitBashMissing()) return yield* Effect.fail(userError("m1das runs bash commands with Git Bash on Windows. Install Git for Windows (https://git-scm.com/download/win), then run m1das init again."));
       if (!input.yes) {
         const accepted = yield* ask(
           Prompt.Confirm({
@@ -63,7 +63,7 @@ export const initCommand = Command.make(
       if (others.length > 0) yield* Console.log(`You already have ${others.length === 1 ? "a bot" : `${others.length} bots`} (${others.join(", ")}). This creates another one.`);
 
       yield* step(1, "Create your bot");
-      const name = Option.isSome(input.name) ? input.name.value : yield* ask(Prompt.String({ message: "What is its name?", default: "Pots" }), "pass --name");
+      const name = Option.isSome(input.name) ? input.name.value : yield* ask(Prompt.String({ message: "What is its name?", default: "m1das" }), "pass --name");
       const id = idFor(name);
 
       yield* step(2, `Give ${name} an AI`);
@@ -82,11 +82,11 @@ export const initCommand = Command.make(
           ? (yield* Prompt.run(Prompt.String({ message: "For example: our team's research and ops assistant, calm and direct", default: "" }))).trim()
           : "";
 
-      const dir = yield* createBot({ id, name, model, judge, ...(about ? { about } : {}), firstWake: firstWake({ id, ...(about ? { about } : {}) }, makerOf("pots init"), others) });
+      const dir = yield* createBot({ id, name, model, judge, ...(about ? { about } : {}), firstWake: firstWake({ id, ...(about ? { about } : {}) }, makerOf("m1das init"), others) });
       yield* Console.log(`Created ${dir}`);
 
       if (input.noService) {
-        yield* Console.log(`\nStart the gateway with pots start; ${name} says hello in its terminal channel. Talk to it with pots chat.`);
+        yield* Console.log(`\nStart the gateway with m1das start; ${name} says hello in its terminal channel. Talk to it with m1das chat.`);
         return;
       }
       const service = yield* Service;
@@ -103,7 +103,7 @@ export const initCommand = Command.make(
 
       yield* step(5, `Talk to ${name}`);
       yield* Console.log(`${name} first checks that it can use this computer's screen and helps you with any permission it needs. Then it sets up the chat apps you want, and asks you only for what it cannot do itself.`);
-      yield* Console.log(`Leave with Ctrl+C; come back any time with pots chat. ${name} keeps working when you leave.`);
+      yield* Console.log(`Leave with Ctrl+C; come back any time with m1das chat. ${name} keeps working when you leave.`);
       if (!input.noChat && interactive) yield* chatInteractive(id);
     }),
 ).pipe(Command.withDescription("Set up your first bot (or another one) on this computer."));

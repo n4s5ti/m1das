@@ -72,7 +72,7 @@ const secret = Command.make(
     }),
 ).pipe(
   Command.withDescription(
-    "Make a password link: Pots' own page, one hidden field per key, that writes KEY=value lines to the file. It works for one submission, and for an hour. The values never reach the chat, the log or the wake.",
+    "Make a password link: m1das' own page, one hidden field per key, that writes KEY=value lines to the file. It works for one submission, and for an hour. The values never reach the chat, the log or the wake.",
   ),
 );
 
@@ -106,7 +106,7 @@ const desktop = Command.make(
     }),
 ).pipe(
   Command.withDescription(
-    "Make a desktop link: Pots' own page, where one person sees and controls your screen through the VNC server of bot.json's vnc, and hands it back. Nothing shows before they press Start, and only the browser that pressed Start first can use it. It works for an hour unopened, then --minutes after Start. You are woken when they hand it back, with their note, or when it ends otherwise.",
+    "Make a desktop link: m1das' own page, where one person sees and controls your screen through the VNC server of bot.json's vnc, and hands it back. Nothing shows before they press Start, and only the browser that pressed Start first can use it. It works for an hour unopened, then --minutes after Start. You are woken when they hand it back, with their note, or when it ends otherwise.",
   ),
 );
 
@@ -115,7 +115,7 @@ const login = Command.make(
   {
     provider: Flag.String("provider").pipe(
       Flag.optional,
-      Flag.withDescription("The provider to sign in to, as pi names it, such as anthropic, openai-codex or typesafe (pots login --list shows what is signed in). Default: the person chooses."),
+      Flag.withDescription("The provider to sign in to, as pi names it, such as anthropic, openai-codex or typesafe (m1das login --list shows what is signed in). Default: the person chooses."),
     ),
     text: Flag.String("text").pipe(Flag.optional, Flag.withDescription("What the page says to the person: what to sign in to, and why.")),
     person,
@@ -133,7 +133,7 @@ const login = Command.make(
     }),
 ).pipe(
   Command.withDescription(
-    "Make a login link: Pots' own page, where one person signs in to a model provider with a subscription, or adds an API key (also TypeSafe's, for Jev), from any device, for every bot and pi on this computer. A new login replaces the provider's old one, and the page says so first. Nothing happens before they press Start, and only the browser that pressed Start first can use it. It works for an hour unopened, then 15 minutes after Start, for several logins. You are woken once for each login, with the provider and the models you can use now, never the login itself; and once at the end when nobody signed in.",
+    "Make a login link: m1das' own page, where one person signs in to a model provider with a subscription, or adds an API key (also TypeSafe's, for Jev), from any device, for every bot and pi on this computer. A new login replaces the provider's old one, and the page says so first. Nothing happens before they press Start, and only the browser that pressed Start first can use it. It works for an hour unopened, then 15 minutes after Start, for several logins. You are woken once for each login, with the provider and the models you can use now, never the login itself; and once at the end when nobody signed in.",
   ),
 );
 

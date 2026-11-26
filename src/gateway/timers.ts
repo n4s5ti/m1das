@@ -48,13 +48,13 @@ export interface Timer {
   due_at: number;
   note: string;
   /**
-   * "agent": set with pots wake, by the agent, its scripts or a person. "routine": a routine's note, or a failed run of
-   * a routine (run_id). "fallback": the check-in while no wake set with pots wake is pending.
+   * "agent": set with m1das wake, by the agent, its scripts or a person. "routine": a routine's note, or a failed run of
+   * a routine (run_id). "fallback": the check-in while no wake set with m1das wake is pending.
    */
   set_by: "agent" | "routine" | "fallback";
-  /** Where the wake comes from: pots wake --from (or $POTS_FROM), or the routine's name. */
+  /** Where the wake comes from: m1das wake --from (or $POTS_FROM), or the routine's name. */
   source: string | null;
-  /** pots wake --id. */
+  /** m1das wake --id. */
   request_id: string | null;
   /** The routine's failed run that this wake is about. */
   run_id: number | null;
@@ -67,7 +67,7 @@ export interface DueTimer extends Timer {
   run?: RoutineRun;
 }
 
-/** What pots wake gives besides the time and the note. */
+/** What m1das wake gives besides the time and the note. */
 export interface WakeOptions {
   source?: string;
   requestId?: string;
@@ -89,7 +89,7 @@ const DAY_MS = 86_400_000;
 const noRunner: RunCommand = async () => ({ error: "this gateway cannot run commands" });
 
 /**
- * Timed wakes and routines. The agent sets as many wakes as it likes. While no wake set with pots wake is pending, one
+ * Timed wakes and routines. The agent sets as many wakes as it likes. While no wake set with m1das wake is pending, one
  * fallback wake is kept, fallbackMinutes after the moment there was none left (the start, the last firing, or a
  * cancel); routines do not count. A routine wakes the bot with its note at its times, or runs its command, which
  * decides itself whether to wake the bot; a failed run wakes the bot once, until a run succeeds.
@@ -151,7 +151,7 @@ export class Timers extends Context.Service<
           return (await tx.get<Timer>(`SELECT ${COLUMNS} FROM bot_timers WHERE id = last_insert_rowid()`))!;
         };
 
-        /** Keep a fallback wake while no wake set with pots wake is pending. Routines do not count. */
+        /** Keep a fallback wake while no wake set with m1das wake is pending. Routines do not count. */
         const ensureFallback = Effect.gen(function* () {
           if ((yield* pending).some((timer) => timer.set_by !== "routine")) return;
           const now = yield* Clock.currentTimeMillis;

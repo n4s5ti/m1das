@@ -252,7 +252,7 @@ export function age(ms: number): string {
 }
 
 /**
- * A child, for the task tool, wakes and pots children: one line, which in the lists also has its thinking level and the
+ * A child, for the task tool, wakes and m1das children: one line, which in the lists also has its thinking level and the
  * model chosen for it, and for a child that works and whose activity was read, indented lines on what it does now.
  */
 export function describeChild(child: ChildInfo, now = Date.now(), options: { thinking?: boolean } = {}): string {

@@ -15,7 +15,7 @@ export interface NewBot {
   name: string;
   model: string;
   judge?: string;
-  /** The one-sentence definition from pots init. The bot turns it into its AGENTS.md and responsibilities. */
+  /** The one-sentence definition from m1das init. The bot turns it into its AGENTS.md and responsibilities. */
   about?: string;
   /** What the bot is told when it starts for the first time. */
   firstWake?: string;
@@ -43,9 +43,9 @@ function nameOf(id: string): string {
  * Who makes a new bot: another bot of this computer, when the command runs in its shell ($POTS_BOT), or else the
  * person at this computer, in a terminal or through an AI agent that works for them.
  */
-export type Maker = { bot: string; name: string } | { person: string; command: "pots init" | "pots bot new" };
+export type Maker = { bot: string; name: string } | { person: string; command: "m1das init" | "m1das bot new" };
 
-export function makerOf(command: "pots init" | "pots bot new"): Maker {
+export function makerOf(command: "m1das init" | "m1das bot new"): Maker {
   const id = process.env.POTS_BOT;
   if (id && BOT_ID.test(id) && existsSync(join(botDir(id), "bot.json"))) return { bot: id, name: nameOf(id) };
   return { person: userInfo().username, command };
@@ -61,17 +61,17 @@ export function firstWake(bot: { id: string; about?: string }, maker: Maker, oth
     them = "that person";
     subject = maker.name;
     lines.push(
-      `This is your first start. ${maker.name}, the bot whose folder is ${botDir(maker.bot)}, created you with pots bot new, most likely because a person asked it to in a chat app. That person does not see your terminal channel (${address}). Until you join a chat app, ${maker.name} passes messages both ways: it writes to you there with pots chat, says who asked for you and where, and passes on what you send there when it next writes to you. When something you send cannot wait, such as a step only that person can do, also wake ${maker.name}: pots wake --bot ${maker.bot} --from ${bot.id} --note "<what to pass on>".`,
+      `This is your first start. ${maker.name}, the bot whose folder is ${botDir(maker.bot)}, created you with m1das bot new, most likely because a person asked it to in a chat app. That person does not see your terminal channel (${address}). Until you join a chat app, ${maker.name} passes messages both ways: it writes to you there with m1das chat, says who asked for you and where, and passes on what you send there when it next writes to you. When something you send cannot wait, such as a step only that person can do, also wake ${maker.name}: m1das wake --bot ${maker.bot} --from ${bot.id} --note "<what to pass on>".`,
     );
-  } else if (maker.command === "pots init") {
+  } else if (maker.command === "m1das init") {
     them = maker.person;
     subject = "They";
-    lines.push(`This is your first start. ${maker.person} just created you with pots init on this computer and is waiting in their terminal: ${address}. You talk there until you join other chat apps.`);
+    lines.push(`This is your first start. ${maker.person} just created you with m1das init on this computer and is waiting in their terminal: ${address}. You talk there until you join other chat apps.`);
   } else {
     them = maker.person;
     subject = "They";
     lines.push(
-      `This is your first start. ${maker.person} just created you with pots bot new on this computer, in a terminal or through an AI agent that works for them. They talk with you in your terminal channel (${address}) with pots chat --bot ${bot.id} until you join other chat apps; what you send there waits until they open it.`,
+      `This is your first start. ${maker.person} just created you with m1das bot new on this computer, in a terminal or through an AI agent that works for them. They talk with you in your terminal channel (${address}) with m1das chat --bot ${bot.id} until you join other chat apps; what you send there waits until they open it.`,
     );
   }
   lines.push(
@@ -120,7 +120,7 @@ export const createBot = (bot: NewBot) =>
 export const waitForBot = (id: string) =>
   control(id, "GET", "/status").pipe(
     Effect.retry({ times: 90, schedule: Schedule.spaced("1 second") }),
-    Effect.mapError(() => userError(`${id} did not start within 90 seconds; see pots service logs`)),
+    Effect.mapError(() => userError(`${id} did not start within 90 seconds; see m1das service logs`)),
   );
 
 const create = Command.make(
@@ -143,15 +143,15 @@ const create = Command.make(
         model: input.model,
         judge: input.judge,
         ...(about ? { about } : {}),
-        firstWake: firstWake({ id, ...(about ? { about } : {}) }, makerOf("pots bot new"), others),
+        firstWake: firstWake({ id, ...(about ? { about } : {}) }, makerOf("m1das bot new"), others),
       });
-      // So that pots chat --bot <id> right after finds it running.
+      // So that m1das chat --bot <id> right after finds it running.
       if (runningGateway() !== undefined) yield* waitForBot(id);
       yield* Console.log(dir);
     }),
 ).pipe(
   Command.withDescription(
-    "Create another bot. When the gateway runs, it waits until the gateway has started it. At its first start the bot says hello in its terminal channel and sets itself up, as after pots init.",
+    "Create another bot. When the gateway runs, it waits until the gateway has started it. At its first start the bot says hello in its terminal channel and sets itself up, as after m1das init.",
   ),
 );
 

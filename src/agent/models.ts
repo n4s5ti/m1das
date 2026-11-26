@@ -53,7 +53,7 @@ export function usePiNetwork(): Promise<void> {
  * Who Pots' model requests come from, for the providers that show it: OpenRouter's app rankings, NVIDIA NIM and
  * OpenCode. pi-ai names pi unless the app names itself; subscription logins send nothing of it.
  */
-export const POTS_IDENTITY: ClientIdentity = { attribution: { name: "Pots", url: "https://pots.sh" } };
+export const POTS_IDENTITY: ClientIdentity = { attribution: { name: "m1das", url: "https://github.com/n4s5ti/m1das" } };
 
 /** The requests that pi-ai identifies to providers. */
 const IDENTIFIED = new Set<PropertyKey>(["stream", "complete", "streamSimple", "completeSimple", "streamDeferred", "fetchDeferred", "cancelDeferred", "generateImages", "classify"]);
@@ -188,7 +188,7 @@ export async function judgeProblem(models: Models, judge: string, mainModel = ""
   const timeout = new Promise<never>((_, reject) => (timer = setTimeout(() => reject(new Error("no answer within 60 seconds")), 60_000)));
   try {
     const asked = createJudge(judge, models, () => mainModel)?.judge({
-      name: "Pots",
+      name: "m1das",
       responsibilities: "The team's releases.",
       place: "general (channel)",
       earlier: [],

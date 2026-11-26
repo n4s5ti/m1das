@@ -13,7 +13,7 @@ Written for a bot that connects itself; a person can follow it too. The bot gets
 2. In the same chat, ask them to send `/setprivacy`, choose the bot, and choose **Disable**. Without this, you get only the group messages that mention you, reply to you or are commands. The change counts only in groups the bot joins after it: in a group the bot is already in, they remove it and add it again.
 3. Ask for the token with ask-secret in the terminal channel:
    `call <terminal channel id> ask-secret {"text": "…", "file": "telegram-<your bot ID>.env", "keys": ["TELEGRAM_BOT_TOKEN"]}`.
-   `pots chat` writes it to `telegram-<your bot ID>.env` in the secrets folder (`~/.pots/secrets/`), readable only by this user, without showing it to you. Your bot ID is the name of your folder, so for the bot `ada` the file is `telegram-ada.env`. Other bots on this computer keep their tokens in the same folder, so never use a file that is not yours, such as a `telegram.env` that is already there:
+   `m1das chat` writes it to `telegram-<your bot ID>.env` in the secrets folder (`~/.pots/secrets/`), readable only by this user, without showing it to you. Your bot ID is the name of your folder, so for the bot `ada` the file is `telegram-ada.env`. Other bots on this computer keep their tokens in the same folder, so never use a file that is not yours, such as a `telegram.env` that is already there:
    ```sh
    TELEGRAM_BOT_TOKEN=123456789:AA...
    ```
@@ -22,7 +22,7 @@ Written for a bot that connects itself; a person can follow it too. The bot gets
    ```json
    { "id": "telegram", "type": "telegram", "secrets": "~/.pots/secrets/telegram-<your bot ID>.env" }
    ```
-   It connects within a few seconds. `pots status` lists it; if it fails, the reason is in `bot.json.error`. Only one process can get a bot's messages: when another one uses the same token, the gateway's output says so.
+   It connects within a few seconds. `m1das status` lists it; if it fails, the reason is in `bot.json.error`. Only one process can get a bot's messages: when another one uses the same token, the gateway's output says so.
 5. Ask the person to add you to their groups (the group's info → **Add members** → your username). To see reactions, you must be an admin of the group: Telegram sends reactions only to admins. To post in a Telegram channel, you must be an admin there.
 6. You can write to a person only after they started a chat with you: they open `https://t.me/<your username>` and press **Start**. Until then, a send to them fails.
 

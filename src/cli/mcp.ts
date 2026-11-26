@@ -4,10 +4,10 @@ import { piModule } from "../agent/models.ts";
 import { botPaths } from "../bot/definition.ts";
 import { botDir, listBots } from "./control.ts";
 
-// pots mcp: pi's own pi mcp (add, remove, list, login, logout) with its options and behaviour, because npm links only
-// pots, not pi. Servers go into pi's mcp.json and sign-ins into pi's mcp-auth.json, in ~/.pi/agent (or
+// m1das mcp: pi's own pi mcp (add, remove, list, login, logout) with its options and behaviour, because npm links only
+// m1das, not pi. Servers go into pi's mcp.json and sign-ins into pi's mcp-auth.json, in ~/.pi/agent (or
 // PI_CODING_AGENT_DIR), which pi and every bot of the computer share; a bot uses a change from its next wake. A sign-in
-// is the person's, as with pots login: pi opens the browser, and asks for the redirected URL when the browser is on
+// is the person's, as with m1das login: pi opens the browser, and asks for the redirected URL when the browser is on
 // another computer. In a bot's workspace, the folder counts as trusted, as it does for the bot.
 
 interface McpCli {
@@ -32,19 +32,19 @@ function isBotWorkspace(dir: string): boolean {
   return here !== undefined && listBots().some((id) => real(botPaths(botDir(id)).workspace) === here);
 }
 
-/** Listed in pots --help. pots.ts hands `pots mcp` to pi before this parser sees it: pi's options are not its options. */
+/** Listed in m1das --help. pots.ts hands `m1das mcp` to pi before this parser sees it: pi's options are not its options. */
 export const mcpCommand = Command.make("mcp").pipe(
-  Command.withDescription("Add, remove and list MCP servers, and sign in to them, as pi mcp does. pots mcp --help shows how."),
+  Command.withDescription("Add, remove and list MCP servers, and sign in to them, as pi mcp does. m1das mcp --help shows how."),
 );
 
-/** Run `pots mcp <args>` as pi runs `pi mcp <args>`, then end the process with its exit code. */
+/** Run `m1das mcp <args>` as pi runs `pi mcp <args>`, then end the process with its exit code. */
 export async function runMcp(args: string[]): Promise<never> {
   const [{ getAgentDir }, { runMcpCommand }] = (await Promise.all([import(piModule("./config.js")), import(piModule("./extensions/mcp/cli.js"))])) as [
     { getAgentDir(): string },
     McpCli,
   ];
   const cwd = process.cwd();
-  // A bot reads the .pi/mcp.json of its workspace whatever pi's trust.json says (src/agent/resources.ts), so pots mcp
+  // A bot reads the .pi/mcp.json of its workspace whatever pi's trust.json says (src/agent/resources.ts), so m1das mcp
   // in that folder lists, signs in to and adds the servers the bot uses, without saying the file is ignored.
   if (isBotWorkspace(cwd)) {
     const { ProjectTrustStore } = (await import(piModule("./core/trust-manager.js"))) as { ProjectTrustStore: TrustStore };
@@ -54,13 +54,13 @@ export async function runMcp(args: string[]): Promise<never> {
     };
   }
   // pi's messages name its own commands, which are not on PATH here. A server with "auth": { "provider": … } signs in
-  // with that pi login, which pots login makes (it asks for the provider); Pots has no command that deletes one.
+  // with that pi login, which m1das login makes (it asks for the provider); Pots has no command that deletes one.
   const named = (line: string) =>
     line
-      .replaceAll(/\bpi mcp\b/g, "pots mcp")
-      .replace(/ Run "pi auth login ([^"]+)"\.$/, ' Sign in to it with "pots login" (provider $1).')
-      .replace(/ Run "pi auth logout [^"]+"\.$/, " pots mcp logout does not sign out of it.")
-      .replace(/^(\s*sign in with: )\/login (\S+) in pi$/, "$1pots login (provider $2)");
+      .replaceAll(/\bpi mcp\b/g, "m1das mcp")
+      .replace(/ Run "pi auth login ([^"]+)"\.$/, ' Sign in to it with "m1das login" (provider $1).')
+      .replace(/ Run "pi auth logout [^"]+"\.$/, " m1das mcp logout does not sign out of it.")
+      .replace(/^(\s*sign in with: )\/login (\S+) in pi$/, "$1m1das login (provider $2)");
   const code = await runMcpCommand(args, {
     cwd,
     agentDir: getAgentDir(),

@@ -45,8 +45,8 @@ describe("the systemd service", () => {
     expect(readFileSync(files.user, "utf8")).toContain("\nOOMPolicy=continue\n");
     expect(commands).toEqual([
       "systemctl --user daemon-reload",
-      "systemctl --user enable pots.service",
-      "systemctl --user restart pots.service",
+      "systemctl --user enable m1das.service",
+      "systemctl --user restart m1das.service",
       `loginctl enable-linger ${userInfo().username}`,
     ]);
     expect(manager.installed()).toBe(true);
@@ -54,10 +54,10 @@ describe("the systemd service", () => {
     // A system service of this user's would replace the other user's.
     commands.length = 0;
     const system = await Effect.runPromise(Effect.flip(manager.install({ system: true })));
-    expect(system.message).toBe(`a system service of user someone-else is installed (${files.system}); use a user service: pots service install`);
+    expect(system.message).toBe(`a system service of user someone-else is installed (${files.system}); use a user service: m1das service install`);
     expect(commands).toEqual([]);
     await Effect.runPromise(manager.uninstall());
-    expect(commands).toEqual(["systemctl --user disable --now pots.service", "systemctl --user daemon-reload"]);
+    expect(commands).toEqual(["systemctl --user disable --now m1das.service", "systemctl --user daemon-reload"]);
     expect(existsSync(files.user)).toBe(false);
     expect(readFileSync(files.system, "utf8")).toContain("User=someone-else");
   });
@@ -71,16 +71,16 @@ describe("the systemd service", () => {
     commands.length = 0;
     await Effect.runPromise(manager.restart());
     expect(readFileSync(files.user, "utf8")).toBe(current);
-    expect(commands).toEqual(["systemctl --user daemon-reload", "systemctl --user restart pots.service"]);
+    expect(commands).toEqual(["systemctl --user daemon-reload", "systemctl --user restart m1das.service"]);
 
-    // Up to date, or not written by Pots: only the restart.
+    // Up to date, or not written by M1das: only the restart.
     commands.length = 0;
     await Effect.runPromise(manager.restart());
-    const own = "[Service]\nExecStart=/usr/bin/node pots.js start\nTimeoutStopSec=30\n";
+    const own = "[Service]\nExecStart=/usr/bin/node m1das.js start\nTimeoutStopSec=30\n";
     writeFileSync(files.user, own);
     await Effect.runPromise(manager.restart());
     expect(readFileSync(files.user, "utf8")).toBe(own);
-    expect(commands).toEqual(["systemctl --user restart pots.service", "systemctl --user restart pots.service"]);
+    expect(commands).toEqual(["systemctl --user restart m1das.service", "systemctl --user restart m1das.service"]);
   });
 
   it("takes a system service that runs as this user as its own", async () => {
@@ -88,12 +88,12 @@ describe("the systemd service", () => {
     expect(manager.installed()).toBe(true);
     expect(manager.kind).toBe("systemd");
     const user = await Effect.runPromise(Effect.flip(manager.install({ system: false })));
-    expect(user.message).toBe(`a system service is installed (${files.system}); use pots service install --system, or uninstall it first`);
+    expect(user.message).toBe(`a system service is installed (${files.system}); use m1das service install --system, or uninstall it first`);
     await Effect.runPromise(manager.restart());
     await Effect.runPromise(manager.uninstall());
     expect(commands).toEqual([
-      "sudo systemctl restart pots.service",
-      "sudo systemctl disable --now pots.service",
+      "sudo systemctl restart m1das.service",
+      "sudo systemctl disable --now m1das.service",
       `sudo rm -f ${files.system}`,
       "sudo systemctl daemon-reload",
     ]);

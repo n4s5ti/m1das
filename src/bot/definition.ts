@@ -91,7 +91,7 @@ export function botPaths(dir: string) {
     crashAfterChildReport: join(dir, "crash-after-child-report"),
     crashAfterChildStop: join(dir, "crash-after-child-stop"),
     crashBeforeMemoryPass: join(dir, "crash-before-memory-pass"),
-    /** A note from pots init: the bot is woken with it at its first start, then the file is removed. */
+    /** A note from m1das init: the bot is woken with it at its first start, then the file is removed. */
     firstWake: join(dir, "first-wake.md"),
   };
 }

@@ -17,8 +17,8 @@ import { SETTINGS_FILE } from "./pages/settings.ts";
 const SCAN_MS = 5_000;
 /** A bot that failed to start or to apply bot.json is tried again after this long (for example while the network is not up yet). */
 const RETRY_MS = 60_000;
-/** The `pots` command line next to this file: src/cli/pots.ts, or dist/cli/pots.js in the built package. */
-const potsEntry = fileURLToPath(new URL(`./cli/pots${import.meta.url.slice(import.meta.url.lastIndexOf("."))}`, import.meta.url));
+/** The `m1das` command line next to this file: src/cli/pots.ts, or dist/cli/pots.js in the built package. */
+const m1dasEntry = fileURLToPath(new URL(`./cli/pots${import.meta.url.slice(import.meta.url.lastIndexOf("."))}`, import.meta.url));
 
 function print(bot: string | undefined) {
   return (message: string, data?: Record<string, unknown>) => {
@@ -27,14 +27,16 @@ function print(bot: string | undefined) {
 }
 
 /**
- * Write the `pots` command that the bots' shells and scheduled jobs use: this node and this package, so it works where
- * PATH has neither (cron, Git Bash on Windows).
+ * Write the `m1das` command that the bots' shells and scheduled jobs use: this node and this package, so it works where
+ * PATH has neither (cron, Git Bash on Windows). Keep `pots` with the same shim for existing routines and crontabs.
  */
-function writePotsCommand(): string {
+function writeM1dasCommand(): string {
   mkdirSync(BIN_DIR, { recursive: true });
   const path = (file: string) => (process.platform === "win32" ? file.replaceAll("\\", "/") : file);
-  const command = join(BIN_DIR, "pots");
-  writeFileSync(command, `#!/bin/sh\nexec "${path(process.execPath)}" "${path(potsEntry)}" "$@"\n`, { mode: 0o755 });
+  const command = join(BIN_DIR, "m1das");
+  const shim = `#!/bin/sh\nexec "${path(process.execPath)}" "${path(m1dasEntry)}" "$@"\n`;
+  writeFileSync(command, shim, { mode: 0o755 });
+  writeFileSync(join(BIN_DIR, "pots"), shim, { mode: 0o755 });
   return command;
 }
 
@@ -44,7 +46,7 @@ export async function runGateway(): Promise<void> {
   const other = runningGateway();
   if (other !== undefined && other !== process.pid) throw new Error(`a gateway is already running for ${POTS_HOME} (process ${other})`);
   writeFileSync(PID_FILE, `${process.pid}\n`);
-  const potsCommand = writePotsCommand();
+  const potsCommand = writeM1dasCommand();
   const log = print(undefined);
   const models = await openModels();
   const settings = await piSettings();
@@ -144,7 +146,7 @@ export async function runGateway(): Promise<void> {
   process.on("SIGTERM", () => void shutdown("SIGTERM"));
   process.on("SIGINT", () => void shutdown("SIGINT"));
   process.on("unhandledRejection", (error) => log("unhandled rejection", { error: String(error) }));
-  // Windows has no SIGTERM: pots service asks over a named pipe instead, and waits for this process to end. The shutdown
+  // Windows has no SIGTERM: m1das service asks over a named pipe instead, and waits for this process to end. The shutdown
   // begins once the answer is written.
   if (process.platform === "win32") {
     const control = new ControlServer(gatewayPipe(process.pid), {

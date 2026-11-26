@@ -389,7 +389,7 @@ describe("buttons and forms", () => {
     expect(fake.called("views.open")).toEqual([]);
     expect(store.openings.size).toBe(0);
     expect(await channel.translate(events[0]!.raw)).toMatchObject([
-      { kind: "interaction", text: 'clicked button "Fill in" (action_id form:nope:1), and no form opened: no form nope is stored (pots form list shows the forms)' },
+      { kind: "interaction", text: 'clicked button "Fill in" (action_id form:nope:1), and no form opened: no form nope is stored (m1das form list shows the forms)' },
     ]);
     expect(await channel.translate(events[1]!.raw)).toMatchObject([
       { kind: "interaction", text: 'clicked button "Ask" (action_id form:ask), and no form opened: the form ask is not a Slack view of type modal' },

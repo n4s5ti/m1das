@@ -475,14 +475,14 @@ describe("Discord channel", () => {
     const answers = Object.fromEntries(fake.requested("POST", "/interactions/\\d+/[\\w-]+/callback").map((request) => [request.path.split("/")[2], request.body]));
     // The form is the first answer, and the only one; its custom_id is the button's, so the submission says which form it is.
     expect(answers).toEqual({ "951": { type: 9, data: { ...form, custom_id: "form:deploy:prod" } }, "952": { type: 6 }, "953": { type: 6 }, "954": { type: 6 } });
-    // The form itself is not stored with the click: pots form list has it.
+    // The form itself is not stored with the click: m1das form list has it.
     expect(clicks[0]!.raw.form).toEqual({ name: "deploy", extra: "prod", opened: true });
     expect(await translate(clicks[0]!.raw)).toMatchObject([
       { kind: "form_opened", place: { address: "discord:#20" }, message: "discord:#20/700", person: { address: "discord:@200" }, text: 'opened form deploy for them: clicked button "Fill in" (custom_id form:deploy:prod)' },
     ]);
     expect(await translate(clicks[1]!.raw)).toMatchObject([{ kind: "interaction", message: "discord:#20/700", text: 'clicked button "Test" (custom_id deploy:test)' }]);
     expect(await translate(clicks[2]!.raw)).toMatchObject([
-      { kind: "interaction", text: 'clicked button "Ask" (custom_id form:nope), and no form opened: no form nope is stored (pots form list shows the forms)' },
+      { kind: "interaction", text: 'clicked button "Ask" (custom_id form:nope), and no form opened: no form nope is stored (m1das form list shows the forms)' },
     ]);
     expect(await translate(clicks[3]!.raw)).toMatchObject([
       { kind: "interaction", text: `clicked button "Slack one" (custom_id form:slackish), and no form opened: the form slackish is not a Discord modal's data (a title and components)` },

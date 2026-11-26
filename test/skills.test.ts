@@ -275,7 +275,7 @@ describe("the prompt", () => {
     name: "Ada",
     paths: botPaths(join(work, "bots", "ada")),
     botsDir: join(work, "bots"),
-    pots: "pots",
+    pots: "m1das",
     machine: { os: "Linux 6.8 (arm64)", hostname: "box", user: "ada", shell: "bash" },
     secretsDir: join(work, "secrets"),
     fallbackWakeMinutes: 120,
@@ -286,16 +286,16 @@ describe("the prompt", () => {
     const folder = folderSection(facts);
     expect(folder).toContain("slack-channel, discord-channel, telegram-channel, teams-channel");
     expect(folder).toContain("the pages skill");
-    expect(folder).toContain("pots page secret");
+    expect(folder).toContain("m1das page secret");
     expect(folder).not.toMatch(/docs[\\/]|channels[\\/]/);
-    expect(folderSection(facts, true)).not.toContain("pots page secret");
+    expect(folderSection(facts, true)).not.toContain("m1das page secret");
   });
 
   it("names a token file for this bot, says how to make another bot, and asks before an action that may cost money", () => {
     for (const folder of [folderSection(facts), folderSection(facts, true)]) {
       expect(folder).toContain("such as slack-ada.env");
-      expect(folder).toContain('pots bot new <name> --about "<what it is for>"');
-      expect(folder).toContain('pots chat --bot <its id> -m "<text>"');
+      expect(folder).toContain('m1das bot new <name> --about "<what it is for>"');
+      expect(folder).toContain('m1das chat --bot <its id> -m "<text>"');
       expect(folder).not.toContain("A new folder with a bot.json is a new bot");
     }
     expect(folderSection(facts)).toContain('"file": "<app>-ada.env"');
@@ -305,11 +305,11 @@ describe("the prompt", () => {
 
   it("lists the page, desktop and form commands", () => {
     const work = workSection(facts);
-    expect(work).toContain("pots page link <name> [--for <person address>]");
-    expect(work).toContain("pots page unlink <link ID or URL> | list");
-    expect(work).toContain("pots page secret --file <name>.env --keys A,B [--text <text>] [--for <person address>]");
-    expect(work).toContain("pots page desktop --text <text> [--for <person address>] [--input password|code|text] [--area x,y,w,h] [--minutes 15]");
+    expect(work).toContain("m1das page link <name> [--for <person address>]");
+    expect(work).toContain("m1das page unlink <link ID or URL> | list");
+    expect(work).toContain("m1das page secret --file <name>.env --keys A,B [--text <text>] [--for <person address>]");
+    expect(work).toContain("m1das page desktop --text <text> [--for <person address>] [--input password|code|text] [--area x,y,w,h] [--minutes 15]");
     expect(work).toContain("the desktop-page skill");
-    expect(work).toContain("pots form add <name> <JSON, or -> | remove <name> | list");
+    expect(work).toContain("m1das form add <name> <JSON, or -> | remove <name> | list");
   });
 });

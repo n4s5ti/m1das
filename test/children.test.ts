@@ -121,7 +121,7 @@ describe("children", { timeout: 90_000 }, () => {
     expect(child.messages.map((message) => message.role)).toEqual(["user"]);
     expect(child.messages[0]!.content).toBe("[brief from the main agent]\nfind the answer");
     expect(child.tools).toEqual(["read", "write", "edit", "bash", "grep", "find", "codemode", "screen"]);
-    expect(child.system).not.toMatch(/pots send|pots react|pots call|ask-secret/);
+    expect(child.system).not.toMatch(/m1das send|m1das react|m1das call|ask-secret/);
     expect(gateway.pots("children")).toMatch(/^c1 "research": ended .* ago, waits for a message, for test:#general, thinking xhigh$/m);
 
     // On Windows a stop ends the process at once, as a kill does, before the gateway writes the spans of its last second:
@@ -195,7 +195,7 @@ describe("children", { timeout: 90_000 }, () => {
     await waitFor(() => results().length === 2, { what: "the second refusal" });
     const list = 'a codemode script lists the models you can use with models.getAvailableOfType("chat").';
     expect(results()).toEqual([
-      `Not started: locked/model is not signed in on this computer: pi has no login or key for "locked". A person signs in with pots login in their terminal; ${list}`,
+      `Not started: locked/model is not signed in on this computer: pi has no login or key for "locked". A person signs in with m1das login in their terminal; ${list}`,
       `Not started: unknown model fake/nope; ${list}`,
     ]);
     expect(gateway.pots("children").trim()).toBe("No children.");
@@ -220,7 +220,7 @@ describe("children", { timeout: 90_000 }, () => {
     });
   }
 
-  it("reports nothing after a stop, from the task tool or pots children", async () => {
+  it("reports nothing after a stop, from the task tool or m1das children", async () => {
     await setUp();
     gateway.say("general", "alice", `@${ME} please research slowly`);
     // The child runs its long command.

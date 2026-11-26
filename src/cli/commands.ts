@@ -15,9 +15,9 @@ import { pageCommand } from "./pages.ts";
 import * as ServiceLayer from "./service.ts";
 import { traceCommand } from "./trace.ts";
 
-// pots: one command for people and for the bots. People set up and run bots (init, chat, service, status); bots and
+// m1das: one command for people and for the bots. People set up and run bots (init, chat, service, status); bots and
 // their scripts act in their channels (send, react, call, wake, routine, form, context, turn-page, children). Each
-// command loads only what it uses: the agent's scripts run pots often, and only pots start needs the gateway and the
+// command loads only what it uses: the agent's scripts run m1das often, and only m1das start needs the gateway and the
 // agent.
 
 const { version } = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8")) as { version: string };
@@ -128,14 +128,13 @@ const service = Command.make("service").pipe(
   Command.withDescription("The gateway as a background service."),
   Command.withSubcommands([serviceInstall, serviceUninstall, serviceRestart, serviceLogs]),
 );
-
-const pots = Command.make("pots").pipe(
-  Command.withDescription("Pots (pi-durable-bot): AI coworkers that live on this computer and work in your chat apps."),
+const m1das = Command.make("m1das").pipe(
+  Command.withDescription("m1das: AI coworkers that live on this computer and work in your chat apps."),
   Command.withSubcommands([initCommand, loginCommand, mcpCommand, chatCommand, start, status, service, botCommand, traceCommand, ...agentCommands, pageCommand]),
 );
 
 /**
- * A mistyped command, such as pots bots new: the error and the whole command it most likely means (pots bot new), not
+ * A mistyped command, such as m1das bots new: the error and the whole command it most likely means (m1das bot new), not
  * the whole help. Other mistakes, and a mistyped command with no close match, get the help and the errors, as before.
  */
 const presenter = CliOutput.layerPresenter({
@@ -146,7 +145,7 @@ const presenter = CliOutput.layerPresenter({
       if (error?._tag !== "UnknownSubcommand" || error.suggestions.length === 0) return yield* CliOutput.defaultPresenter.present(event);
       const args = process.argv.slice(2);
       const at = args.indexOf(error.subcommand);
-      const commands = error.suggestions.map((name) => ["pots", ...args.slice(0, at), name, ...args.slice(at + 1)].map(shellWord).join(" "));
+      const commands = error.suggestions.map((name) => ["m1das", ...args.slice(0, at), name, ...args.slice(at + 1)].map(shellWord).join(" "));
       const formatter = yield* CliOutput.Formatter;
       yield* Console.error(formatter.formatErrors([new CliError.UnknownSubcommand({ ...error, suggestions: at < 0 ? error.suggestions : commands })]));
     }),
@@ -160,12 +159,12 @@ function shellWord(word: string): string {
 /** Resolves once stdout and stderr have written all they were given. On macOS a pipe takes writes asynchronously. */
 const written = () => Promise.all([process.stdout, process.stderr].map((stream) => new Promise<void>((resolve) => stream.write("", () => resolve()))));
 
-Command.run(pots, { version }).pipe(
+Command.run(m1das, { version }).pipe(
   Effect.provide(Layer.mergeAll(NodeServices.layer, ServiceLayer.layer, presenter)),
   NodeRuntime.runMain({
     disableErrorReporting: true,
     // A command that has finished ends the process, also when something it used left a handle open. A browser sign-in
-    // in pi leaves the browser's spare connection to pi's callback server open, and pots init --no-chat did not end.
+    // in pi leaves the browser's spare connection to pi's callback server open, and m1das init --no-chat did not end.
     teardown: (exit) => {
       if (!gatewayRunning) Runtime.defaultTeardown(exit, (code) => void written().then(() => process.exit(code)));
     },

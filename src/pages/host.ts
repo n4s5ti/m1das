@@ -195,7 +195,7 @@ export class PageHost {
       const publicUrl = readSettings(this.#options.settingsFile).publicUrl;
       if (publicUrl) hosts.push(new URL(publicUrl).host);
     } catch {
-      // settings.json is wrong; pots status says so
+      // settings.json is wrong; m1das status says so
     }
     if (this.#tunnel?.address) hosts.push(new URL(this.#tunnel.address).host);
     return hosts;
@@ -234,7 +234,7 @@ export class PageHost {
     if (this.#port === undefined) throw new Error(`the page server is not running: ${this.#problem ?? "it is starting"}`);
   }
 
-  /** pots page link: a new link to a page, written before it is given out. */
+  /** m1das page link: a new link to a page, written before it is given out. */
   async link(bot: BotPages, page: string, person?: string): Promise<{ link: string; url: string; via: Via; note?: string }> {
     this.#ready();
     const made = await bot.createLink(page, person);
@@ -248,7 +248,7 @@ export class PageHost {
     return { link: made.id, url: `${address.base}/p/${made.token}/`, via: address.via, ...(address.via === "quick-tunnel" ? { note: QUICK_TUNNEL_NOTE } : {}) };
   }
 
-  /** pots page secret: a password link for one submission, open for an hour. */
+  /** m1das page secret: a password link for one submission, open for an hour. */
   async secret(
     bot: BotPages,
     input: { file: string; keys: readonly string[]; text?: string; person?: string },
@@ -272,7 +272,7 @@ export class PageHost {
   }
 
   /**
-   * pots page desktop: a link to Pots' own desktop page, with which one person sees and controls the bot's screen. Pots
+   * m1das page desktop: a link to Pots' own desktop page, with which one person sees and controls the bot's screen. Pots
    * checks first that it reaches the VNC server of bot.json.
    */
   async desktop(
@@ -298,7 +298,7 @@ export class PageHost {
   }
 
   /**
-   * pots page login: a link to Pots' own login page, where one person signs in to a model provider with a subscription
+   * m1das page login: a link to Pots' own login page, where one person signs in to a model provider with a subscription
    * or an API key, for every bot and pi on this computer.
    */
   async login(bot: BotPages, input: { provider?: string; text?: string; person?: string }): Promise<{ link: string; url: string; expires: string; via: Via; note?: string }> {
@@ -320,15 +320,15 @@ export class PageHost {
     };
   }
 
-  /** pots page unlink: by link ID or by URL. */
+  /** m1das page unlink: by link ID or by URL. */
   async unlink(bot: BotPages, link: string): Promise<string> {
     const token = /\/(?:p|s|d|g)\/([A-Za-z0-9_-]{16,128})(?:\/|$)/.exec(link)?.[1];
     const revoked = await bot.revoke(token ?? link.trim());
-    if (!revoked) throw new Error(`there is no link ${JSON.stringify(link)} of this bot (pots page list shows them)`);
+    if (!revoked) throw new Error(`there is no link ${JSON.stringify(link)} of this bot (m1das page list shows them)`);
     return `Unlinked ${revoked}.`;
   }
 
-  /** pots page list: the bot's pages and links, with their URLs at the address links use now. */
+  /** m1das page list: the bot's pages and links, with their URLs at the address links use now. */
   async list(bot: BotPages): Promise<unknown> {
     const listing = await bot.list();
     let address: { base?: string; via: Via } = { via: "quick-tunnel" };
@@ -342,7 +342,7 @@ export class PageHost {
     return {
       via: address.via,
       address: address.base ?? null,
-      ...(address.base ? {} : { addressNote: problem ?? "no Quick Tunnel runs now; the next pots page link, secret, desktop or login starts one, and these links work again at its address" }),
+      ...(address.base ? {} : { addressNote: problem ?? "no Quick Tunnel runs now; the next m1das page link, secret, desktop or login starts one, and these links work again at its address" }),
       pages: listing.pages.map((page) => ({
         page: page.page,
         kept: page.kept,
@@ -389,7 +389,7 @@ export class PageHost {
     };
   }
 
-  /** For pots status. */
+  /** For m1das status. */
   status(): PageServerStatus {
     let via: Via | undefined;
     let address: string | undefined;
@@ -412,7 +412,7 @@ export class PageHost {
   }
 }
 
-/** One line for pots status. */
+/** One line for m1das status. */
 export function describePageServer(status: PageServerStatus | undefined, keptPort: number | undefined): string {
   if (!status) return `pages: not running${keptPort === undefined ? "" : ` (port ${keptPort})`}`;
   if (!status.listening) return `pages: not served: ${status.problem ?? "starting"}`;
@@ -420,5 +420,5 @@ export function describePageServer(status: PageServerStatus | undefined, keptPor
   if (status.problem) return `pages: ${port}; ${status.problem}`;
   if (status.address) return `pages: ${port}, ${status.address} (${status.via})`;
   const tunnel = status.tunnel?.error ? `; ${status.tunnel.error}` : "";
-  return `pages: ${port}, no public address yet (quick-tunnel: it starts at the first pots page link${tunnel})`;
+  return `pages: ${port}, no public address yet (quick-tunnel: it starts at the first m1das page link${tunnel})`;
 }

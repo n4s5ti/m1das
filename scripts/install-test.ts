@@ -1,12 +1,12 @@
 // The package as a person gets it, from end to end. CI runs it on Linux, macOS and Windows (.github/workflows/ci.yml):
-// pack the package, install it globally from the tarball without our lockfile, make a bot with pots init and the fake
+// pack the package, install it globally from the tarball without our lockfile, make a bot with m1das init and the fake
 // model of the tests (test/support/fake-model.ts, so no API key), run the gateway as a background service, send the bot
 // one message over its terminal channel and wait for its answer, and remove the service. The gateway must stop
 // cleanly: its output ends with "shutdown" and "bot stopped".
 //
-//   node scripts/install-test.ts               the service, as pots init installs it
+//   node scripts/install-test.ts               the service, as m1das init installs it
 //   node scripts/install-test.ts --system      Linux: a system service (needs sudo)
-//   node scripts/install-test.ts --foreground  pots start in a child process instead of the service
+//   node scripts/install-test.ts --foreground  m1das start in a child process instead of the service
 //
 // The service's gateway reads pi's models.json from ~/.pi/agent and keeps its bots in ~/.pots, as a person's does, so
 // the script writes there, and runs only where the CI variable is set. --foreground uses folders of its own and touches
@@ -42,8 +42,8 @@ if (mode === "foreground") {
 const potsHome = env.POTS_HOME ?? join(homedir(), ".pots");
 const piDir = env.PI_CODING_AGENT_DIR ?? join(homedir(), ".pi", "agent");
 const prefix = join(work, "global");
-const pots = windows ? join(prefix, "pots.cmd") : join(prefix, "bin", "pots");
-/** pots start, with --foreground. */
+const m1das = windows ? join(prefix, "m1das.cmd") : join(prefix, "bin", "m1das");
+/** m1das start, with --foreground. */
 let gateway: ChildProcess | undefined;
 let gatewayOutput = "";
 
@@ -85,7 +85,7 @@ const tarball = readdirSync(work).find((file) => file.endsWith(".tgz"));
 if (!tarball) fail(`npm pack wrote no tarball to ${work}`);
 // Globally, without our lockfile: a dependency's own loose range can pull in a version we never tested.
 await must("npm", ["install", "--global", "--prefix", prefix, "--no-audit", "--no-fund", join(work, tarball)]);
-await must(pots, ["--version"]);
+await must(m1das, ["--version"]);
 
 // ---- A bot with the fake model ----
 
@@ -96,23 +96,23 @@ mkdirSync(piDir, { recursive: true });
 const fake = { baseUrl: model.url, api: "openai-completions", apiKey: "fake", compat: { supportsDeveloperRole: false, supportsReasoningEffort: false }, models: [{ id: "coworker", contextWindow: 128_000 }] };
 writeFileSync(models, JSON.stringify({ providers: { fake } }, null, 2));
 
-const created = await must(pots, ["init", "--yes", "--name", "CI", "--model", "fake/coworker", "--judge", "off", "--no-service", "--no-chat"]);
+const created = await must(m1das, ["init", "--yes", "--name", "CI", "--model", "fake/coworker", "--judge", "off", "--no-service", "--no-chat"]);
 const dir = /^Created (.+)$/m.exec(created)?.[1]?.trim();
-if (!dir) fail("pots init did not say which folder it made");
+if (!dir) fail("m1das init did not say which folder it made");
 const bot = basename(dir);
 
-// ---- The gateway: the service, or pots start ----
+// ---- The gateway: the service, or m1das start ----
 
 if (mode === "foreground") {
-  console.log(`\n$ ${pots} start (in the background)`);
-  gateway = spawn(windows ? `"${pots}"` : pots, ["start"], { env, cwd: work, shell: windows });
+  console.log(`\n$ ${m1das} start (in the background)`);
+  gateway = spawn(windows ? `"${m1das}"` : m1das, ["start"], { env, cwd: work, shell: windows });
   gateway.stdout!.on("data", (chunk: Buffer) => (gatewayOutput += chunk.toString("utf8")));
   gateway.stderr!.on("data", (chunk: Buffer) => process.stderr.write(chunk));
 } else {
-  await must(pots, ["service", "install", ...(mode === "system" ? ["--system"] : [])]);
+  await must(m1das, ["service", "install", ...(mode === "system" ? ["--system"] : [])]);
 }
 
-/** The gateway's output: from pots start, the log file of launchd and Task Scheduler, or the journal of systemd. */
+/** The gateway's output: from m1das start, the log file of launchd and Task Scheduler, or the journal of systemd. */
 async function gatewayLog(): Promise<string> {
   if (mode === "foreground") return gatewayOutput;
   if (process.platform !== "linux") {
@@ -125,22 +125,22 @@ async function gatewayLog(): Promise<string> {
 }
 
 async function failWithLogs(message: string): Promise<never> {
-  console.error("\n---- pots status ----");
-  if (existsSync(pots)) console.error((await run(pots, ["status"], { quiet: true })).out);
+  console.error("\n---- m1das status ----");
+  if (existsSync(m1das)) console.error((await run(m1das, ["status"], { quiet: true })).out);
   console.error("---- the gateway's output, last lines ----");
   console.error((await gatewayLog()).split("\n").slice(-60).join("\n"));
   if (windows) console.error((await run("powershell.exe", ["-NoProfile", "-Command", "Get-ScheduledTask -TaskName Pots | Get-ScheduledTaskInfo | Format-List"], { quiet: true })).out);
   fail(message);
 }
 
-/** Wait until pots status says the bot runs. */
+/** Wait until m1das status says the bot runs. */
 async function waitForBot(): Promise<void> {
   const deadline = Date.now() + 120_000;
   let status = "";
   while (Date.now() < deadline) {
-    status = (await run(pots, ["status"], { quiet: true })).out;
+    status = (await run(m1das, ["status"], { quiet: true })).out;
     if (new RegExp(`^${bot}: CI, fake/coworker, (idle|working)`, "m").test(status)) {
-      console.log(`\n$ ${pots} status\n${status}`);
+      console.log(`\n$ ${m1das} status\n${status}`);
       return;
     }
     if (gateway && gateway.exitCode !== null) break;
@@ -153,10 +153,10 @@ await waitForBot();
 
 // ---- One message and its answer, over the terminal channel ----
 
-const answer = await must(pots, ["chat", "--bot", bot, "-m", "hello", "--timeout", "120"]);
-if (!answer.includes("CI: ack: [wake] DM")) await failWithLogs("the bot's answer did not come back in pots chat");
+const answer = await must(m1das, ["chat", "--bot", bot, "-m", "hello", "--timeout", "120"]);
+if (!answer.includes("CI: ack: [wake] DM")) await failWithLogs("the bot's answer did not come back in m1das chat");
 
-// ---- Stop: remove the service, or stop pots start as the service would ----
+// ---- Stop: remove the service, or stop m1das start as the service would ----
 
 if (gateway) {
   // On Windows the child is the shell that runs pots.cmd; the gateway's own process ID is in its pid file.
@@ -166,7 +166,7 @@ if (gateway) {
   } else gateway.kill("SIGTERM");
   await new Promise((resolve) => gateway!.once("exit", resolve));
 } else {
-  await must(pots, ["service", "uninstall"]);
+  await must(m1das, ["service", "uninstall"]);
 }
 
 /** Whether the gateway's last run ended cleanly: after its last "started", a "shutdown" and the bot's "bot stopped". */
@@ -188,10 +188,10 @@ while (!(await stoppedCleanly())) {
   if (Date.now() > deadline) await failWithLogs("the gateway did not stop cleanly: its output has no shutdown after its last start");
   await pause(500);
 }
-const status = await must(pots, ["status"]);
+const status = await must(m1das, ["status"]);
 if (!/^gateway: not running$/m.test(status) || !/^service: not installed$/m.test(status)) await failWithLogs("the gateway or the service is still there");
 
 await model.close();
 // So that the next run, such as the one with --system, finds the computer as this one did.
 rmSync(models);
-console.log(`\nOK: installed, ran as ${mode === "foreground" ? "pots start" : mode === "system" ? "a system service" : "a service"}, answered, and stopped cleanly.`);
+console.log(`\nOK: installed, ran as ${mode === "foreground" ? "m1das start" : mode === "system" ? "a system service" : "a service"}, answered, and stopped cleanly.`);

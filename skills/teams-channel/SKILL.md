@@ -22,7 +22,7 @@ By default Teams sends you events over a socket that you open (Socket Mode), so 
 3. **Custom apps allowed?** `teams status --json` also gives `tdp.sideloading`: `tenant` (the organisation lets custom apps be uploaded) and `user` (this person may). When either is `false`, the person needs their admin. Write them this note to forward:
    > Please allow custom apps for <person>: in the Teams admin center, Teams apps → Setup policies → (their policy) → turn on **Upload custom apps**; and Teams apps → Manage apps → Org-wide app settings → turn on **Custom apps**. It can take up to 24 hours.
 
-   Set a timer (`pots wake`) to check `teams status --json` again later.
+   Set a timer (`m1das wake`) to check `teams status --json` again later.
 4. **Make the app.** One command makes the app, its bot, and its secret, and writes the secret to your env file itself, so it never passes through you:
    ```sh
    teams app create --name "<your name>" --messaging-mode socket --env ~/.pots/secrets/teams-<your bot ID>.env --json
@@ -41,7 +41,7 @@ By default Teams sends you events over a socket that you open (Socket Mode), so 
    ```json
    { "id": "teams", "type": "teams", "secrets": "~/.pots/secrets/teams-<your bot ID>.env" }
    ```
-   It connects within a few seconds. `pots status` lists it; if it fails, the reason is in `bot.json.error` or in the gateway's output.
+   It connects within a few seconds. `m1das status` lists it; if it fails, the reason is in `bot.json.error` or in the gateway's output.
 7. **The install link.** `teams app get <teamsAppId> --install-link` prints it. Send it to the person. They open it in Teams and choose **Add to a team** (and a channel), **Add to a chat**, or **Add** for a DM with you. Teams asks them to allow what the app reads; they allow it. You get a `join` event: say hello there. For each other team or chat, they add the app there too; no more sign-in.
 8. **Sign the person out.** When the app works: `teams logout`. The CLI keeps the person's sign-in on this computer, for every bot here, and nothing else needs it. A later change to the app (a new permission, HTTP mode) needs a new device-code sign-in (step 2), then `teams logout` again.
 
@@ -106,7 +106,7 @@ In a channel, a reply in a thread is `/v3/conversations/<channel ID>;messageid=<
 ```
 
 - `Action.Execute` buttons: `verb` and `data` come back with the click, so make them say what the click means. `Action.OpenUrl` opens a link and does not reach you.
-- **Forms**: inputs (`Input.Text`, `Input.ChoiceSet`, `Input.Toggle`, `Input.Date`, …) sit in the card itself. Each one's `id` names its value; a click on any `Action.Execute` button sends the values with its `data`. So a card with inputs and a Submit button is a form. Teams' pop-up dialogs are not supported yet, and `pots form` is not for Teams.
+- **Forms**: inputs (`Input.Text`, `Input.ChoiceSet`, `Input.Toggle`, `Input.Date`, …) sit in the card itself. Each one's `id` names its value; a click on any `Action.Execute` button sends the values with its `data`. So a card with inputs and a Submit button is a form. Teams' pop-up dialogs are not supported yet, and `m1das form` is not for Teams.
 - **Tables**: a small table in Markdown may show; a larger one goes in a card's `Table` element, or in a page (the pages skill).
 - When Teams refuses the card, the `call` error says what Teams answered.
 

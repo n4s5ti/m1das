@@ -2,7 +2,7 @@
 
 <img src="docs/media/logo.png" width="112" alt="Pots logo">
 
-# pi-durable-bot (Pots)
+# m1das (Pots)
 
 **The open-source Grok Bot alternative: an AI coworker that acts on its own.**
 
@@ -11,7 +11,7 @@ does the work on its own computer, and speaks up when it should.
 
 [Demo](#see-it-work) · [Compare](#open-and-yours) · [Quick start](#quick-start) · [How it decides](#how-it-decides-to-act) · [How it works](#how-it-works)
 
-[![Star pi-durable-bot on GitHub](https://img.shields.io/github/stars/Crokily/pi-durable-bot?style=social&label=Star)](https://github.com/Crokily/pi-durable-bot/stargazers)
+[![Star m1das on GitHub](https://img.shields.io/github/stars/n4s5ti/m1das?style=social&label=Star)](https://github.com/n4s5ti/m1das/stargazers)
 [![npm](https://img.shields.io/npm/v/pi-durable-bot?style=flat-square&color=1F7A70)](https://www.npmjs.com/package/pi-durable-bot)
 [![Platforms: macOS, Linux, Windows](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-1F7A70?style=flat-square)](#quick-start)
 [![License: MIT](https://img.shields.io/badge/license-MIT-1F7A70?style=flat-square)](LICENSE)
@@ -24,7 +24,7 @@ does the work on its own computer, and speaks up when it should.
 </div>
 
 > [!TIP]
-> **Setting this up with an AI agent, such as Claude Code, Codex or Cursor?** Have it read [docs/for-agents.md](https://github.com/Crokily/pi-durable-bot/blob/main/docs/for-agents.md) first. That page explains Pots to your agent and how to set it up. In short: the agent installs it and makes the bot, you sign in to your model (and a judge such as Jev, for group chats) with `pots login`, and then the bot connects Slack and your other apps itself.
+> **Setting this up with an AI agent, such as Claude Code, Codex or Cursor?** Have it read [docs/for-agents.md](https://github.com/n4s5ti/m1das/blob/main/docs/for-agents.md) first. That page explains Pots to your agent and how to set it up. In short: the agent installs it from the [m1das checkout](https://github.com/n4s5ti/m1das), you sign in to your model (and a judge such as Jev, for group chats) with `m1das login`, and then the bot connects Slack and your other apps itself.
 
 <p align="center" id="see-it-work">
   <a href="docs/media/demo.mp4"><img src="docs/media/demo.gif" width="900" alt="In Slack, Pots reads every message and decides a pricing question is its job, checks the pricing page in a browser on its own computer, picks up after being killed mid-task, sends a comparison page, uses Slack's own buttons, and takes an API key on a one-time page"></a>
@@ -96,13 +96,13 @@ This is **code mode**: the agent gets a few general tools (`read`, `write`, `edi
 
 One agent at a time per screen is enforced only on Linux, where plain `bash` has no `DISPLAY` or `WAYLAND_DISPLAY` and so cannot reach the screen. On macOS and Windows the screen does not depend on those variables, so `bash` can still use it; there the agents use the `screen` tool because the prompt tells them to.
 
-On Linux with a systemd user manager (a desktop, or a server with lingering, which `pots service install` turns on), each command of `bash`, `screen` and a routine runs in a systemd scope of its own, in one slice per Pots home. When memory runs out, systemd-oomd or the kernel then stops the command that uses it, not the gateway with every bot in it. What a command leaves running when it returns, such as a browser, a dev server or a `nohup` job, keeps running when Pots restarts after an upgrade or a crash, and the bot's next wake lists it, so the bot decides when to stop it. A command Pots still waits on when it stops is stopped, with what it started. When you stop Pots' service on purpose (`systemctl --user stop pots`, `pots service uninstall`), everything its commands left stops too. A scope costs about 25 ms per command. Where there is no user manager (macOS, Windows, `--system` services, most containers), commands run as before.
+On Linux with a systemd user manager (a desktop, or a server with lingering, which `m1das service install` turns on), each command of `bash`, `screen` and a routine runs in a systemd scope of its own, in one slice per Pots home. When memory runs out, systemd-oomd or the kernel then stops the command that uses it, not the gateway with every bot in it. What a command leaves running when it returns, such as a browser, a dev server or a `nohup` job, keeps running when Pots restarts after an upgrade or a crash; its output goes to `m1das service logs`.
 
 ### 👥 Its own helpers
 
 Longer work does not keep it from talking. With its `task` tool the bot starts **children**: agents that work in the background with `read`, `write`, `edit`, `bash`, `grep`, `find`, `screen` and `codemode`, without the channel actions and `task`, on a brief it writes for them. It answers the person first, hands the work to a child, and stays free for the next message. A child starts from an empty conversation and its brief, so the bot's own context stays small; it sees the bot's memory index as it was when it started. When a child ends, done, failed or with a question for a person, its final message comes back to the bot as a wake, exactly once, also across crashes and restarts; the bot passes on what matters, and sends the child the answer to its question. While a child works for a place, new messages there go to the bot, so it can pass them on. A child takes the bot's messages only between its steps, so a message sent while it is in a long command waits until the command ends. Wherever the bot sees a child that works (its timed and fallback wakes, the wakes from the child's place, the task tool's list and the answer to a message it sends), it sees what the child does now: the tool call it is in and for how long, the start of the command, its last line of output and how old that is, and how many of the bot's messages wait for it. When a command hangs, the bot can interrupt the child's current tool calls: the child goes on with its work so far, sees that they were aborted, and takes the messages that waited. A stopped child reports nothing and does nothing more, also when the process dies in the middle of the stop.
 
-The bot chooses each child's model and thinking level when it starts it: any model signed in on this computer, and any of pi's levels. A child it starts without a choice has the bot's `model`, also after a change in `bot.json`, and thinking `xhigh`. A child keeps the model chosen for it and its level for its whole life, also across restarts; a level the model does not have becomes the nearest one it has, as in pi. A model that is unknown or not signed in is refused before the child starts, with the reason, so the bot can take another or ask you to run `pots login`. By default the bot talks at the `thinking` of `bot.json` (`medium`), and its children do the work at `xhigh` or `max`. Which model does which work is yours to say: the bot asks at its first start and keeps your answer in its `AGENTS.md`. `settings.maxChildren` (50 by default) caps how many work at once. `pots children` lists them, and `pots children --stop <id>` or `--stop-all` stops them.
+The bot chooses each child's model and thinking level when it starts it: any model signed in on this computer, and any of pi's levels. A child it starts without a choice has the bot's `model`, also after a change in `bot.json`, and thinking `xhigh`. A child keeps the model chosen for it and its level for its whole life, also across restarts; a level the model does not have becomes the nearest one it has, as in pi. A model that is unknown or not signed in is refused before the child starts, with the reason, so the bot can take another or ask you to run `m1das login`. By default the bot talks at the `thinking` of `bot.json` (`medium`), and its children do the work at `xhigh` or `max`. Which model does which work is yours to say: the bot asks at its first start and keeps your answer in its `AGENTS.md`. `settings.maxChildren` (50 by default) caps how many work at once. `m1das children` lists them, and `m1das children --stop <id>` or `--stop-all` stops them.
 
 It works like a [pi](https://github.com/earendil-works/pi) session: it reads `AGENTS.md` and uses [Agent Skills](https://agentskills.io) from the same places pi does, so the skills you give pi, the bot can use too. Screenshots and photos are shrunk to fit the model, as in pi.
 
@@ -117,25 +117,25 @@ Some things do not fit in a chat message. For a plan, a report or a dashboard, t
 - **Buttons and forms in the chat.** On Slack and Discord the bot sends the platform's own buttons, menus and forms; on Telegram, inline buttons; on Teams, Adaptive Cards. A click wakes it within a second, and a form opens at once.
 - **A password page for secrets.** When the bot needs an API key from you, it sends a one-time link to a page of Pots' own. You type the key there. It goes into a file in the secrets folder, never into the chat, the log or a trace.
 - **A desktop page for the steps only you can do.** When a sign-in, a CAPTCHA or an approval needs you, the bot sends a one-time link. On your phone or computer you see its whole screen, do the step, and press Done; the bot is woken with your note and carries on. On a phone the picture fills the screen, and the bot's desktop takes your phone's shape when its VNC server can change size; you type into a field that sends each character as you go. Pots signs in to the VNC server on the bot's computer itself, so its password stays there, and nothing shows before you press Start. While you have the screen, the bot's screen commands do not run.
-- **A login page for models.** When a model login expires, or you want another model or a judge, the bot sends a one-time link. On your phone or computer you sign in with your subscription (a device code or a copy code works from any device) or paste an API key, also TypeSafe's for Jev, as many as you need, then press Done. pi keeps the login on the bot's computer, for every bot there; the bot is told which provider and which models it can use now, never the login. When no bot can think, because its only login expired, `pots login --link` on that computer prints such a link.
+- **A login page for models.** When a model login expires, or you want another model or a judge, the bot sends a one-time link. On your phone or computer you sign in with your subscription (a device code or a copy code works from any device) or paste an API key, also TypeSafe's for Jev, as many as you need, then press Done. pi keeps the login on the bot's computer, for every bot there; the bot is told which provider and which models it can use now, never the login. When no bot can think, because its only login expired, `m1das login --link` on that computer prints such a link.
 - **No public address needed.** The first link starts a Cloudflare Quick Tunnel, so pages work from a laptop behind a home router. For a fixed address, the bot sets up Tailscale Funnel with you, or uses your own domain.
 
 ### ⏰ Its own schedule
 
-It promises to come back, and it does. A timed wake (`pots wake`) wakes it once, at a time it chooses. A **routine** (`pots routine`) repeats: every 30 minutes, say, or on a cron schedule in the computer's time zone. Both live in the same database as everything else, so they survive restarts. It can also add normal cron jobs on its machine.
+It promises to come back, and it does. A timed wake (`m1das wake`) wakes it once, at a time it chooses. A **routine** (`m1das routine`) repeats: every 30 minutes, say, or on a cron schedule in the computer's time zone. Both live in the same database as everything else, so they survive restarts. It can also add normal cron jobs on its machine.
 
 | Command | What it does |
 |---|---|
-| `pots routine add <name> (--every <duration> \| --cron "<expr>") (--note "<text>" \| --run "<command>") [--timeout <duration>]` | Add a routine, or replace the one with that name. Names are letters, digits, `-` and `_`; durations are as in `pots wake --in`: `90s`, `30m`, `2h`, `1d` |
-| `pots routine list` | Each routine's schedule, what it does, its next time and its last run; and the fallback check-in |
-| `pots routine remove <name>` | Remove a routine |
+| `m1das routine add <name> (--every <duration> \| --cron "<expr>") (--note "<text>" \| --run "<command>") [--timeout <duration>]` | Add a routine, or replace the one with that name. Names are letters, digits, `-` and `_`; durations are as in `m1das wake --in`: `90s`, `30m`, `2h`, `1d` |
+| `m1das routine list` | Each routine's schedule, what it does, its next time and its last run; and the fallback check-in |
+| `m1das routine remove <name>` | Remove a routine |
 
-- `--note` wakes the bot with the note at each time. `--run` makes Pots run the command at each time, in the bot's shell, folder and environment, with `POTS_FROM` set to the routine's name. The command decides itself whether to wake the bot with `pots wake`, so watching an inbox every few minutes costs no model request until there is mail.
+- `--note` wakes the bot with the note at each time. `--run` makes Pots run the command at each time, in the bot's shell, folder and environment, with `POTS_FROM` set to the routine's name. The command decides itself whether to wake the bot with `m1das wake`, so watching an inbox every few minutes costs no model request until there is mail.
 - A run is skipped while the last run of the same routine still runs. Times missed while the gateway was stopped or the computer was off or asleep are skipped, not made up: the next run is the next time from now.
 - A command runs at most 10 minutes, or its `--timeout`; then Pots stops it and the processes it started. When the gateway stops, it stops the commands it runs.
 - Pots keeps each run's start, end, exit code and last lines of output for 7 days. A failed run (a non-zero exit code, or the timeout) wakes the bot once, with that output; later failures of the same routine do not, until one of its runs succeeds.
-- A script that calls `pots wake` says where the wake comes from with `--from <name>` (letters, digits, `-` and `_`), or `$POTS_FROM`. The wake then tells the bot that it comes from a command on this computer, not from a person, so outside text in its note, such as an email's subject, does not read as the bot's own plan. With `--id <id>`, a second `pots wake` with the same ID gives back the first wake and sets none, as `pots send --id` does.
-- The fallback check-in (`fallbackWakeMinutes` in `bot.json`, 120 by default) comes while no wake set with `pots wake` is pending. Routines do not hold it back.
+- A script that calls `m1das wake` says where the wake comes from with `--from <name>` (letters, digits, `-` and `_`), or `$POTS_FROM`. The wake then tells the bot that it comes from a command on this computer, not from a person, so outside text in its note, such as an email's subject, does not read as the bot's own plan. With `--id <id>`, a second `m1das wake` with the same ID gives back the first wake and sets none, as `m1das send --id` does.
+- The fallback check-in (`fallbackWakeMinutes` in `bot.json`, 120 by default) comes while no wake set with `m1das wake` is pending. Routines do not hold it back.
 
 ### 📓 Its own memory
 
@@ -155,43 +155,46 @@ Built on [pi-durable](https://github.com/earendil-works/pi), every step is journ
 You need [Node.js](https://nodejs.org) 24 or newer, on macOS, Linux or Windows (with [Git for Windows](https://git-scm.com/download/win)).
 
 ```sh
-npm install -g pi-durable-bot
-pots init
+git clone https://github.com/n4s5ti/m1das.git
+cd m1das
+npm install
+npm link
+m1das init
 ```
 
-`pots init` asks four things:
+`m1das init` asks four things:
 
 1. **Your bot's name.**
-2. **Its AI.** Sign in with a subscription you already pay for (ChatGPT, Claude, GitHub Copilot, Grok, Kimi and more), use an API key, or point it at a local server (Ollama, LM Studio, llama.cpp). After a Claude subscription login, it shows pi's notice that a third-party program such as Pots draws from Claude's extra usage, billed per token, not from your plan's limits; `pots login` and the login page show it too. pi's setting `warnings.anthropicExtraUsage` (`/settings` in pi) turns it off in both.
+2. **Its AI.** Sign in with a subscription you already pay for (ChatGPT, Claude, GitHub Copilot, Grok, Kimi and more), use an API key, or point it at a local server (Ollama, LM Studio, llama.cpp). After a Claude subscription login, it shows pi's notice that a third-party program such as Pots draws from Claude's extra usage, billed per token, not from your plan's limits; `m1das login` and the login page show it too. pi's setting `warnings.anthropicExtraUsage` (`/settings` in pi) turns it off in both.
 3. **Who decides on group messages that do not mention it.** By default the bot itself: every such message wakes it. Or Jev, a fast judge from TypeSafe, with your TypeSafe API key, or a judge model you already set up in pi; the bot then wakes only for the messages about its work.
 4. **In one sentence, what it is for.** Optional. The bot writes its own persona and responsibilities from it.
 
-Then the gateway starts as a background service (it starts again at login) and you are talking to your bot in the terminal. It first checks that it can use the computer's screen and walks you through any permission it needs, such as Screen Recording and Accessibility on a Mac. On a server with no desktop, it works without a screen and asks you before it sets one up. Tell it which chat apps to join. It sets them up itself on its computer and asks you only for what it cannot do, like signing in to Slack or approving the app. Leave with Ctrl+C; come back with `pots chat`.
+Then the gateway starts as a background service (it starts again at login) and you are talking to your bot in the terminal. It first checks that it can use the computer's screen and walks you through any permission it needs, such as Screen Recording and Accessibility on a Mac. On a server with no desktop, it works without a screen and asks you before it sets one up. Tell it which chat apps to join. It sets them up itself on its computer and asks you only for what it cannot do, like signing in to Slack or approving the app. Leave with Ctrl+C; come back with `m1das chat`.
 
 It joins only the places it is invited to, like a new hire who is added to the right channels.
 
-To add another bot, ask a bot you have to make one, or run `pots bot new <name> --about "<what it is for>"`. The new bot sets itself up the same way, and when another bot already uses the screen, it offers to set up one of its own ([Add another bot](docs/for-agents.md#add-another-bot)).
+To add another bot, ask a bot you have to make one, or run `m1das bot new <name> --about "<what it is for>"`. The new bot sets itself up the same way, and when another bot already uses the screen, it offers to set up one of its own ([Add another bot](docs/for-agents.md#add-another-bot)).
 
 | Command | What it does |
 |---|---|
-| `pots init` | Set up your first bot, or another one |
-| `pots login` | Sign in to models and judges, or add API keys or local servers, one after another, for every bot on this computer; `--list` shows what can be used; `--link` prints a link to a login page instead, for a person on any device |
-| `pots mcp add \| remove \| list \| login \| logout` | The [MCP servers](#mcp-servers) of every bot on this computer, and sign-ins to them |
-| `pots chat` | Talk to a bot in this terminal |
-| `pots status` | The gateway, the service and each bot |
-| `pots service install \| uninstall \| restart \| logs` | The gateway as a background service: launchd on macOS, systemd on Linux (`--system` for a server), Task Scheduler on Windows |
-| `pots start` | Run the gateway in this terminal instead |
-| `pots bot new \| list` | Create and list bots |
-| `pots trace` | What a bot did: its last wakes, or one wake from the events to its run, the runs of the children it started, and the messages it sent, with how much of each model request the provider's prompt cache served |
-| `pots children [--stop <id> \| --stop-all]` | The children a bot started for longer work, with each one's thinking level, the model the bot chose for it, and what each one that works does now, or stop them |
+| `m1das init` | Set up your first bot, or another one |
+| `m1das login` | Sign in to models and judges, or add API keys or local servers, one after another, for every bot on this computer; `--list` shows what can be used; `--link` prints a link to a login page instead, for a person on any device |
+| `m1das mcp add \| remove \| list \| login \| logout` | The [MCP servers](#mcp-servers) of every bot on this computer, and sign-ins to them |
+| `m1das chat` | Talk to a bot in this terminal |
+| `m1das status` | The gateway, the service and each bot |
+| `m1das service install \| uninstall \| restart \| logs` | The gateway as a background service: launchd on macOS, systemd on Linux (`--system` for a server), Task Scheduler on Windows |
+| `m1das start` | Run the gateway in this terminal instead |
+| `m1das bot new \| list` | Create and list bots |
+| `m1das trace` | What a bot did: its last wakes, or one wake from the events to its run, the runs of the children it started, and the messages it sent, with how much of each model request the provider's prompt cache served |
+| `m1das children [--stop <id> \| --stop-all]` | The children a bot started for longer work, with each one's thinking level, the model the bot chose for it, and what each one that works does now, or stop them |
 
-To upgrade, run `npm install -g pi-durable-bot@latest`, then `pots service restart`. To remove it, run `pots service uninstall`, then `npm uninstall -g pi-durable-bot`. The bots stay in `~/.pots/` until you delete that folder.
+To upgrade, from the checkout run `git pull`, `npm install`, and `npm link`, then `m1das service restart`. To remove it, run `m1das service uninstall`, then `npm unlink -g m1das`. The bots stay in `~/.pots/` until you delete that folder.
 
 ### Choose the models
 
-`pots init` sets up the model, and `pots login` signs in to others or adds keys, one after another, for every bot on the computer. Each bot's `bot.json` names its model and, if you want one, a judge, and you can change them at any time; edits apply within seconds. Logins, API keys and local endpoints are stored in pi's files in `~/.pi/agent/`, so the [pi](https://github.com/earendil-works/pi) command line, if you use it, shares them.
+`m1das init` sets up the model, and `m1das login` signs in to others or adds keys, one after another, for every bot on the computer. Each bot's `bot.json` names its model and, if you want one, a judge, and you can change them at any time; edits apply within seconds. Logins, API keys and local endpoints are stored in pi's files in `~/.pi/agent/`, so the [pi](https://github.com/earendil-works/pi) command line, if you use it, shares them.
 
-The bot's children, which do its longer work, have the bot's model unless it chooses another one for a child. At its first start it asks you which models you want for which work; sign in to those with `pots login` too.
+The bot's children, which do its longer work, have the bot's model unless it chooses another one for a child. At its first start it asks you which models you want for which work; sign in to those with `m1das login` too.
 
 | Field | What it does | Values |
 |---|---|---|
@@ -205,7 +208,7 @@ With `off`, each group of messages is a wake of the main model, which then decid
 
 Requests through OpenRouter, NVIDIA NIM and OpenCode name Pots (https://pots.sh) as the app, where pi would name itself; subscription logins send no such name.
 
-**OpenAI-compatible and local endpoints** (Ollama, LM Studio, vLLM, a proxy): `pots init` and `pots login` add them for you. By hand, they go in pi's `~/.pi/agent/models.json` ([fields](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)):
+**OpenAI-compatible and local endpoints** (Ollama, LM Studio, vLLM, a proxy): `m1das init` and `m1das login` add them for you. By hand, they go in pi's `~/.pi/agent/models.json` ([fields](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)):
 
 ```json
 {
@@ -237,12 +240,12 @@ The bot uses [MCP](https://modelcontextprotocol.io) servers through pi's own MCP
 
 | Command | What it does |
 |---|---|
-| `pots mcp add <server> -- <command> [args...]` | Add a server that runs on this computer; `--url <url>` adds a remote one |
-| `pots mcp list` | Each server, whether it connects, and its tools |
-| `pots mcp login <server>` | Sign in to a server in your browser; `logout` signs out |
-| `pots mcp remove <server>` | Remove a server |
+| `m1das mcp add <server> -- <command> [args...]` | Add a server that runs on this computer; `--url <url>` adds a remote one |
+| `m1das mcp list` | Each server, whether it connects, and its tools |
+| `m1das mcp login <server>` | Sign in to a server in your browser; `logout` signs out |
+| `m1das mcp remove <server>` | Remove a server |
 
-`pots mcp` is pi's `pi mcp`, with the same options (`pots mcp --help`); npm links only `pots`, so `pi` may not be on your PATH. Sign-ins are stored in pi's `~/.pi/agent/mcp-auth.json`, and the bot uses a new one from its next request. When the browser is on another computer, as over SSH, paste the address the browser was sent to into the terminal.
+`m1das mcp` is pi's `pi mcp`, with the same options (`m1das mcp --help`); npm links only `m1das`, so `pi` may not be on your PATH. Sign-ins are stored in pi's `~/.pi/agent/mcp-auth.json`, and the bot uses a new one from its next request. When the browser is on another computer, as over SSH, paste the address the browser was sent to into the terminal.
 
 The bot also looks for a command line tool, an API or an MCP server before it uses the screen. When it finds a command line tool that has no skill yet, it offers to write one in `~/.agents/skills/`, so every bot and pi know when and how to use it.
 
@@ -309,7 +312,7 @@ flowchart LR
 | Bot | Identity, persona, responsibilities, notes, timers, workspace and one long conversation. |
 | Agent | [pi-durable](https://github.com/earendil-works/pi): runs the model, journals every step, owns the tools. |
 
-One gateway process runs every bot on the machine. Everything lives in `~/.pots/` (or `$POTS_HOME`): one folder per bot in `bots/`, channel tokens in `secrets/`, the memory the bots share about you in `memory/`, the gateway's output in `logs/` on macOS and Windows (on Linux, `pots service logs` reads the journal). Each bot folder holds:
+One gateway process runs every bot on the machine. Everything lives in `~/.pots/` (or `$POTS_HOME`): one folder per bot in `bots/`, channel tokens in `secrets/`, the memory the bots share about you in `memory/`, the gateway's output in `logs/` on macOS and Windows (on Linux, `m1das service logs` reads the journal). Each bot folder holds:
 
 | File | What it is |
 |---|---|
@@ -319,15 +322,15 @@ One gateway process runs every bot on the machine. Everything lives in `~/.pots/
 | `notes.md` | Its handoff to the next page: what it is doing and what it promised. |
 | `workspace/` | Its working directory. |
 | `files/` | Files people sent in messages, in `files/tmp/`: one folder per message, and in it one numbered folder per file. Pots deletes them 30 days after they were saved, and nothing else in the bot folder; the bot moves or copies out of `files/tmp/` what it keeps. |
-| `terminal/` | Its terminal channel: what you and the bot say in `pots chat`. |
+| `terminal/` | Its terminal channel: what you and the bot say in `m1das chat`. |
 | `memory/` | Its memory: one markdown file per memory, and `MEMORY.md`, their index. The bot maintains it. |
 | `bot.sqlite` | Message log, timers, routines and the agent's journal in one file. |
 
-The same `pots` command gives the bot (and its scripts and cron jobs) its actions from a shell: `pots send`, `pots react`, `pots call`, `pots wake`, `pots routine`, `pots context`, `pots turn-page`, `pots children`. Tokens stay inside the running gateway; the agent never sees them.
+The same `m1das` command gives the bot (and its scripts and cron jobs) its actions from a shell: `m1das send`, `m1das react`, `m1das call`, `m1das wake`, `m1das routine`, `m1das context`, `m1das turn-page`, `m1das children`. Tokens stay inside the running gateway; the agent never sees them.
 
-The bot sends its whole conversation with each model request, so the provider's prompt cache matters: a request whose start the provider has cached costs a fraction. The system prompt holds only facts that stay the same, and the bot's own parts of it, its memory too, keep their text for the whole page; a change, such as a new `settings` value in `bot.json`, shows after the page turns, after pi compacts, or after an upgrade. What changes from one wake to the next, such as the time, the context use and the bot's own address in a channel, is in the wake. `pots trace` and `pots context` show how much of the input the cache served and what the requests that missed it cost.
+The bot sends its whole conversation with each model request, so the provider's prompt cache matters: a request whose start the provider has cached costs a fraction. The system prompt holds only facts that stay the same, and the bot's own parts of it, its memory too, keep their text for the whole page; a change, such as a new `settings` value in `bot.json`, shows after the page turns, after pi compacts, or after an upgrade. What changes from one wake to the next, such as the time, the context use and the bot's own address in a channel, is in the wake. `m1das trace` and `m1das context` show how much of the input the cache served and what the requests that missed it cost.
 
-A cache entry lasts about 5 minutes, and the bot often waits longer: for a person's answer, or for a child's work. So Pots warms the cache as the pi command line does: shortly before the entry of the main agent's or a child's last request expires, it sends that request again with a one-token answer, but only when pi's numbers say the warm costs less than the miss it saves. It warms during a run for up to an hour after the request, and after the run for up to 30 minutes. pi's setting `cacheWarming` in `~/.pi/agent/settings.json` is the switch for both: `idle` (the default), `streaming` (only during a run) or `off`. Memory passes, compaction and the judge are not warmed. A warm is in `pots trace`, beside the request it repeats.
+A cache entry lasts about 5 minutes, and the bot often waits longer: for a person's answer, or for a child's work. So Pots warms the cache as the pi command line does: shortly before the entry of the main agent's or a child's last request expires, it sends that request again with a one-token answer, but only when pi's numbers say the warm costs less than the miss it saves. It warms during a run for up to an hour after the request, and after the run for up to 30 minutes. pi's setting `cacheWarming` in `~/.pi/agent/settings.json` is the switch for both: `idle` (the default), `streaming` (only during a run) or `off`. Memory passes, compaction and the judge are not warmed. A warm is in `m1das trace`, beside the request it repeats.
 
 ## Status
 
@@ -338,12 +341,12 @@ pi-durable-bot runs every day as a teammate in a real workspace. What works toda
 - [x] Telegram adapter (long polling). Telegram's Bot API cannot read history or look up a sent message, so the bot gets what it missed only within 24 hours, and a crash at the moment of a send can send it twice
 - [x] Microsoft Teams adapter, a preview (Socket Mode, or HTTP at the public address), with backfill of channels and group chats through Microsoft Graph. Tested with fakes and Microsoft 365 Agents Playground, not yet in a real organisation: the live socket, the permissions people grant, the backfill, files, admin policies and rate limits are untested. A crash at the moment of a send can send it twice, as on Telegram
 - [x] Mention, DM, judge and timer wakes, grouping, and steering
-- [x] Code mode on its own machine, `pots` command line
+- [x] Code mode on its own machine, `m1das` command line
 - [x] Turning the page with notes, compaction as a fallback
 - [x] Memory it keeps by itself after each piece of work, its own and one shared about you
 - [x] Crash-safe inbox and outbox, tested with a forced crash mid-send
 - [x] Several bots per machine
-- [x] `pots init`: name, AI, judge and one sentence, then the bot sets up its own chat apps from the terminal
+- [x] `m1das init`: name, AI, judge and one sentence, then the bot sets up its own chat apps from the terminal
 - [x] macOS, Linux and Windows, as a background service of the user
 - [x] The screen, mouse and keyboard of its computer, used like a person (computer use), or no screen on a server
 - [x] Children for longer work in the background, reported back once, also across restarts
@@ -354,14 +357,15 @@ pi-durable-bot runs every day as a teammate in a real workspace. What works toda
 - [x] Pages, buttons, forms and a password page, with a public address that needs no setup
 - [x] A desktop page: a person takes over the bot's screen from a link, on a phone or a computer, and hands it back
 - [ ] More adapters: email
-- [ ] `pots init` in a web page, for people who do not use a terminal
+- [ ] `m1das init` in a web page, for people who do not use a terminal
 
 ## Develop
 
 ```sh
-git clone https://github.com/Crokily/pi-durable-bot && cd pi-durable-bot
+git clone https://github.com/n4s5ti/m1das.git
+cd m1das
 npm install
-npm run pots -- status    # the pots command, straight from src/ (Node 24 runs TypeScript)
+npm run m1das -- status    # the m1das command, straight from src/ (Node 24 runs TypeScript)
 npm run check             # type check
 npm test                  # tests, including a real gateway with a fake model
 npm run tla               # the TLA+ models of the inbox, outbox and waker (needs Java and tla2tools.jar)
@@ -371,11 +375,11 @@ npm run tla               # the TLA+ models of the inbox, outbox and waker (need
 
 ## Star history
 
-<a href="https://www.star-history.com/#Crokily/pi-durable-bot&Date">
+<a href="https://www.star-history.com/#n4s5ti/m1das&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Crokily/pi-durable-bot&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Crokily/pi-durable-bot&type=Date" />
-    <img alt="Star history of pi-durable-bot" src="https://api.star-history.com/svg?repos=Crokily/pi-durable-bot&type=Date" width="100%" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=n4s5ti/m1das&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=n4s5ti/m1das&type=Date" />
+    <img alt="Star history of m1das" src="https://api.star-history.com/svg?repos=n4s5ti/m1das&type=Date" width="100%" />
   </picture>
 </a>
 
@@ -386,7 +390,7 @@ npm run tla               # the TLA+ models of the inbox, outbox and waker (need
 - [pi-durable](https://github.com/earendil-works/pi) for the durable agent runtime
 - [Chat SDK](https://chat-sdk.dev) for channel adapters
 - [pi](https://github.com/earendil-works/pi)'s model layer for logins, providers and local models
-- [Effect](https://effect.website) for the gateway core and the `pots` command line
+- [Effect](https://effect.website) for the gateway core and the `m1das` command line
 - [TypeSafe AI](https://typesafe.ai)'s Jev, one of the judges you can choose
 
 ## Official accounts

@@ -9,7 +9,7 @@ description: Slack for a Pots bot. How to connect a Slack workspace yourself (th
 
 Written for a bot that connects itself; a person can follow it too. The app uses socket mode, so the computer needs no public address.
 
-1. Open https://api.slack.com/apps?new_app=1 in the browser on your screen. If Slack asks to sign in, ask the person to sign in there. When they are not at this computer, give them a desktop page link (`pots page desktop`, see the desktop-page skill): from it they see and use your screen on their phone or computer, sign in, and hand it back.
+1. Open https://api.slack.com/apps?new_app=1 in the browser on your screen. If Slack asks to sign in, ask the person to sign in there. When they are not at this computer, give them a desktop page link (`m1das page desktop`, see the desktop-page skill): from it they see and use your screen on their phone or computer, sign in, and hand it back.
    If this computer has no screen, ask the person how they want to do it (your instructions, under the screen, say what each way costs): a virtual desktop, where they sign in themselves from a desktop page link, a browser-only tool such as agent-browser, or steps 1 to 4 in the browser on their own computer while you guide them. In the last case, give them the manifest with your name already in it, and ask for the two tokens with ask-secret in the terminal channel (step 5).
 2. Choose **From a manifest**, pick the workspace, and paste [slack-app-manifest.yaml](slack-app-manifest.yaml). Change `name` and `display_name` to your own name first. Create the app.
    A manifest cannot set the app's icon. To give it one, go to **Basic Information → Display Information**, choose **Add App Icon**, and upload a square image file from this computer; the page says which sizes it takes. In the file dialog you can type or paste the file's path instead of clicking through folders: Ctrl+L opens a field for it on Linux, Cmd+Shift+G on a Mac; on Windows, use the file name field. The icon is saved at once.
@@ -21,12 +21,12 @@ Written for a bot that connects itself; a person can follow it too. The app uses
    SLACK_BOT_TOKEN=xoxb-...
    ```
    Do not put tokens in a chat message, a log or any other file. When the person copied the tokens, ask for them in the terminal channel instead:
-   `call <terminal channel id> ask-secret {"text": "…", "file": "slack-<your bot ID>.env", "keys": ["SLACK_APP_TOKEN", "SLACK_BOT_TOKEN"]}`. `pots chat` writes them to this file without showing them to you.
+   `call <terminal channel id> ask-secret {"text": "…", "file": "slack-<your bot ID>.env", "keys": ["SLACK_APP_TOKEN", "SLACK_BOT_TOKEN"]}`. `m1das chat` writes them to this file without showing them to you.
 6. Add the channel to `channels` in your `bot.json`:
    ```json
    { "id": "slack", "type": "slack", "secrets": "~/.pots/secrets/slack-<your bot ID>.env" }
    ```
-   It connects within a few seconds. `pots status` lists it; if it fails, the reason is in `bot.json.error`.
+   It connects within a few seconds. `m1das status` lists it; if it fails, the reason is in `bot.json.error`.
 7. You join only the places you are invited to. Ask the person to invite you to the right channels (`/invite @yourname`) or to send you a DM in Slack.
 
 A second Slack workspace is a second channel entry with its own `id` (for example `slack-acme`) and its own env file (`slack-acme-<your bot ID>.env`).
@@ -85,14 +85,14 @@ When someone uses a slash command or a button of the app, you get a `command` or
 
 **Forms.** Slack opens a form (a modal) only within 3 seconds of a click, which is too soon for you, so you store the form first and Pots opens it:
 
-1. `pots form add <name> <JSON>`, or `-` to read the JSON from stdin: a Slack [view](https://docs.slack.dev/reference/views/modal-views) of type `modal`, with a `title` (at most 24 characters), `submit`, and `blocks` (at most 100) with [`input` blocks](https://docs.slack.dev/reference/block-kit/blocks/input-block). Each input's `block_id` and `action_id` name its value in the answer. Pots sets `private_metadata` itself, to find your message again; if you set your own, it comes back in the answer as a `private_metadata:` line. A name has letters, digits, `-` and `_`, at most 64 characters, and no `:`. Adding a name in use replaces that form.
+1. `m1das form add <name> <JSON>`, or `-` to read the JSON from stdin: a Slack [view](https://docs.slack.dev/reference/views/modal-views) of type `modal`, with a `title` (at most 24 characters), `submit`, and `blocks` (at most 100) with [`input` blocks](https://docs.slack.dev/reference/block-kit/blocks/input-block). Each input's `block_id` and `action_id` name its value in the answer. Pots sets `private_metadata` itself, to find your message again; if you set your own, it comes back in the answer as a `private_metadata:` line. A name has letters, digits, `-` and `_`, at most 64 characters, and no `:`. Adding a name in use replaces that form.
 2. Post a button whose `action_id` is `form:<name>`, or `form:<name>:<extra>`. `<extra>` comes back with the answer, so one form serves many messages, for example `form:release-notes:4.2`.
-3. Someone clicks, and Pots opens the form at once. The click itself does not wake you. When they submit the form, you are woken at once with the form's name, `<extra>`, the submitted values and who submitted it. Slack closes the form when it is submitted, so check the values in your answer, not inside the form. If the form could not open (no form of that name is stored, it is not a view of type `modal`, or Slack refused it), the click wakes you with the reason. `pots form add` stores any JSON object; the form is checked only when it opens.
+3. Someone clicks, and Pots opens the form at once. The click itself does not wake you. When they submit the form, you are woken at once with the form's name, `<extra>`, the submitted values and who submitted it. Slack closes the form when it is submitted, so check the values in your answer, not inside the form. If the form could not open (no form of that name is stored, it is not a view of type `modal`, or Slack refused it), the click wakes you with the reason. `m1das form add` stores any JSON object; the form is checked only when it opens.
 
-`pots form list` shows your forms, and `pots form remove <name>` removes one.
+`m1das form list` shows your forms, and `m1das form remove <name>` removes one.
 
 ```sh
-pots form add release-notes - <<'EOF'
+m1das form add release-notes - <<'EOF'
 {"type": "modal", "title": {"type": "plain_text", "text": "Release notes"},
  "submit": {"type": "plain_text", "text": "Send"},
  "blocks": [{"type": "input", "block_id": "notes", "label": {"type": "plain_text", "text": "What changed?"},

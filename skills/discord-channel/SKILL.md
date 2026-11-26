@@ -9,7 +9,7 @@ description: Discord for a Pots bot. How to connect a Discord bot yourself (the 
 
 Written for a bot that connects itself; a person can follow it too. The bot connects to Discord's gateway, so the computer needs no public address.
 
-1. Open https://discord.com/developers/applications in the browser on your screen. If Discord asks to sign in, ask the person to sign in there. When they are not at this computer, give them a desktop page link (`pots page desktop`, see the desktop-page skill): from it they see and use your screen on their phone or computer, sign in, and hand it back.
+1. Open https://discord.com/developers/applications in the browser on your screen. If Discord asks to sign in, ask the person to sign in there. When they are not at this computer, give them a desktop page link (`m1das page desktop`, see the desktop-page skill): from it they see and use your screen on their phone or computer, sign in, and hand it back.
    If this computer has no screen, ask the person how they want to do it (your instructions, under the screen, say what each way costs): a virtual desktop, where they sign in themselves from a desktop page link, a browser-only tool such as agent-browser, or steps 1 to 5 and 8 in the browser on their own computer while you guide them. In the last case, ask for the token with ask-secret in the terminal channel (step 6).
 2. **New Application**: give it your own name. Discord asks to agree to its Developer Terms of Service and Policy: ask the person whether they agree, and check the box only if they do. Create it. On **General Information**, copy the **Application ID**; you need it in step 5. It is not a secret.
 3. **Bot → Reset Token**. Discord may ask for the person's password or a two-factor code; then ask the person. Copy the token. Discord shows it only once; if it is lost, reset it again.
@@ -24,12 +24,12 @@ Written for a bot that connects itself; a person can follow it too. The bot conn
    DISCORD_BOT_TOKEN=...
    ```
    Do not put the token in a chat message, a log or any other file. When the person copied the token, ask for it in the terminal channel instead:
-   `call <terminal channel id> ask-secret {"text": "…", "file": "discord-<your bot ID>.env", "keys": ["DISCORD_BOT_TOKEN"]}`. `pots chat` writes it to this file without showing it to you.
+   `call <terminal channel id> ask-secret {"text": "…", "file": "discord-<your bot ID>.env", "keys": ["DISCORD_BOT_TOKEN"]}`. `m1das chat` writes it to this file without showing it to you.
 7. Add the channel to `channels` in your `bot.json`:
    ```json
    { "id": "discord", "type": "discord", "secrets": "~/.pots/secrets/discord-<your bot ID>.env" }
    ```
-   It connects within a few seconds. `pots status` lists it; if it fails, the reason is in `bot.json.error`.
+   It connects within a few seconds. `m1das status` lists it; if it fails, the reason is in `bot.json.error`.
 8. So that nobody else can add you to their server: under **Installation**, set **Install Link** to **None** and save; then under **Bot**, turn off **Public Bot** and save. Discord refuses the second while the first is set. After this, only the person who owns the application can add you to another server, with the same URL.
 
 You read every channel of a server that your role lets you see. A server's admins choose which channels those are. People can also send you a DM.
@@ -87,14 +87,14 @@ When someone uses a command or a button of yours, you get an `interaction` event
 
 **Forms.** Discord opens a form (a modal) only as the first answer to a click, within 3 seconds, which is too soon for you, so you store the form first and Pots opens it:
 
-1. `pots form add <name> <JSON>`, or `-` to read the JSON from stdin: the `data` of a Discord modal ([reference](https://docs.discord.com/developers/interactions/receiving-and-responding)), with `custom_id`, `title` (at most 45 characters) and `components`: 1 to 5 [Label](https://docs.discord.com/developers/components/reference) components (type 18, `label` at most 45 characters), each holding one text input (type 4; `style` 1 for one line, 2 for several; up to 4000 characters), select menu, radio group, checkbox group or checkbox. Each one's `custom_id` names its value in the answer (Discord sends no labels back). Pots sets the modal's own `custom_id` to the button's, to find your message again, so yours is replaced. A name has letters, digits, `-` and `_`, at most 64 characters, and no `:`. Adding a name in use replaces that form.
+1. `m1das form add <name> <JSON>`, or `-` to read the JSON from stdin: the `data` of a Discord modal ([reference](https://docs.discord.com/developers/interactions/receiving-and-responding)), with `custom_id`, `title` (at most 45 characters) and `components`: 1 to 5 [Label](https://docs.discord.com/developers/components/reference) components (type 18, `label` at most 45 characters), each holding one text input (type 4; `style` 1 for one line, 2 for several; up to 4000 characters), select menu, radio group, checkbox group or checkbox. Each one's `custom_id` names its value in the answer (Discord sends no labels back). Pots sets the modal's own `custom_id` to the button's, to find your message again, so yours is replaced. A name has letters, digits, `-` and `_`, at most 64 characters, and no `:`. Adding a name in use replaces that form.
 2. Post a button whose `custom_id` is `form:<name>`, or `form:<name>:<extra>`. `<extra>` comes back with the answer, so one form serves many messages, for example `form:bug-report:4.2`.
-3. Someone clicks, and Pots opens the form at once. The click itself does not wake you. When they submit the form, you are woken at once with the form's name, `<extra>`, the submitted values and who submitted it. If the form could not open (no form of that name is stored, it is not a Discord modal's data, or Discord refused it), the click wakes you with the reason. `pots form add` stores any JSON object; the form is checked only when it opens.
+3. Someone clicks, and Pots opens the form at once. The click itself does not wake you. When they submit the form, you are woken at once with the form's name, `<extra>`, the submitted values and who submitted it. If the form could not open (no form of that name is stored, it is not a Discord modal's data, or Discord refused it), the click wakes you with the reason. `m1das form add` stores any JSON object; the form is checked only when it opens.
 
-`pots form list` shows your forms, and `pots form remove <name>` removes one.
+`m1das form list` shows your forms, and `m1das form remove <name>` removes one.
 
 ```sh
-pots form add bug-report - <<'EOF'
+m1das form add bug-report - <<'EOF'
 {"custom_id": "bug-report", "title": "Report a bug", "components": [
   {"type": 18, "label": "What happened?", "component": {"type": 4, "custom_id": "what", "style": 2, "max_length": 1000}}]}
 EOF

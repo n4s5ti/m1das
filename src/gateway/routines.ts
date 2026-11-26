@@ -75,7 +75,7 @@ export interface RoutineRun {
   output: string;
 }
 
-/** What pots routine add gives. Times in ms. */
+/** What m1das routine add gives. Times in ms. */
 export interface RoutineInput {
   name: string;
   every?: number;
@@ -160,7 +160,7 @@ export function lastLines(text: string): string {
   return last.length > OUTPUT_CHARS ? last.slice(-OUTPUT_CHARS) : last;
 }
 
-/** A duration as pots wake --in takes it: 90s, 30m, 2h, 1d. */
+/** A duration as m1das wake --in takes it: 90s, 30m, 2h, 1d. */
 export function formatDuration(ms: number): string {
   for (const [unit, size] of [["d", 86_400_000], ["h", 3_600_000], ["m", 60_000], ["s", 1_000]] as const) {
     if (ms >= size && ms % size === 0) return `${ms / size}${unit}`;
@@ -208,14 +208,14 @@ export function describeRun(run: RoutineRun, now: number): string {
   }
 }
 
-/** The routines and the fallback check-in, as pots routine list gives them. */
+/** The routines and the fallback check-in, as m1das routine list gives them. */
 export interface RoutineListing {
   routines: (Routine & { last?: RoutineRun })[];
-  /** next: when the fallback check-in comes; undefined while a wake set with pots wake is pending. */
+  /** next: when the fallback check-in comes; undefined while a wake set with m1das wake is pending. */
   fallback: { minutes: number; next?: number };
 }
 
-/** pots routine list, for people and the bot. */
+/** m1das routine list, for people and the bot. */
 export function renderRoutines(listing: RoutineListing, now: number): string {
   const lines: string[] = [];
   for (const routine of listing.routines) {
@@ -224,7 +224,7 @@ export function renderRoutines(listing: RoutineListing, now: number): string {
     lines.push(`  last: ${routine.last ? describeRun(routine.last, now) : `none in the last ${RUN_DAYS} days`}`);
   }
   const fallback = listing.fallback;
-  lines.push(`- fallback check-in (built in, cannot be removed): every ${fallback.minutes} minutes while no wake set with pots wake is pending`);
-  lines.push(fallback.next === undefined ? "  next: waits, because a wake set with pots wake is pending" : `  next: ${formatTime(fallback.next)}`);
+  lines.push(`- fallback check-in (built in, cannot be removed): every ${fallback.minutes} minutes while no wake set with m1das wake is pending`);
+  lines.push(fallback.next === undefined ? "  next: waits, because a wake set with m1das wake is pending" : `  next: ${formatTime(fallback.next)}`);
   return [listing.routines.length === 0 ? "No routines added." : `Routines (${listing.routines.length}):`, ...lines].join("\n");
 }

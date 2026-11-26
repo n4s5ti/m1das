@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type FakeModel, startFakeModel } from "./support/fake-model.ts";
 import { CHANNEL, ME, TestGateway, waitFor } from "./support/gateway.ts";
 
-// The pots command line from outside: what each command prints and does, against a real gateway with one bot. Only
+// The m1das command line from outside: what each command prints and does, against a real gateway with one bot. Only
 // the output, the exit status, the test platform and the bot's log are checked.
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version: string };
@@ -39,9 +39,9 @@ const fails = async (...args: string[]) => {
   return result.stderr.trim();
 };
 
-describe("pots", { timeout: 120_000 }, () => {
+describe("m1das", { timeout: 120_000 }, () => {
   it("says its version", async () => {
-    expect((await pots("--version")).trim()).toBe(`pots v${version}`);
+    expect((await pots("--version")).trim()).toBe(`m1das v${version}`);
   });
 
   it("ends when a command is done, after all its output, also when something left a connection open", async () => {
@@ -54,8 +54,8 @@ describe("pots", { timeout: 120_000 }, () => {
     );
     const result = await gateway.run(["--version"], { env: { NODE_OPTIONS: `--import ${pathToFileURL(held).href}` } });
     expect(result.status).toBe(0);
-    expect(result.stdout.length).toBe((1 << 20) + `pots v${version}\n`.length);
-    expect(result.stdout.slice(1 << 20)).toBe(`pots v${version}\n`);
+    expect(result.stdout.length).toBe((1 << 20) + `m1das v${version}\n`.length);
+    expect(result.stdout.slice(1 << 20)).toBe(`m1das v${version}\n`);
   });
 
   it("shows the gateway and its bot", async () => {
@@ -63,7 +63,7 @@ describe("pots", { timeout: 120_000 }, () => {
     expect(lines[0]).toBe(`home: ${gateway.home}`);
     expect(lines[1]).toMatch(/^gateway: running \(process \d+\)$/);
     expect(lines[2]).toMatch(/^service: /);
-    expect(lines[3]).toMatch(/^pages: port \d+, no public address yet \(quick-tunnel: it starts at the first pots page link\)$/);
+    expect(lines[3]).toMatch(/^pages: port \d+, no public address yet \(quick-tunnel: it starts at the first m1das page link\)$/);
     expect(lines.slice(4)).toEqual(["coworker: Coworker, fake/coworker, idle, channels test, terminal"]);
     expect(await pots("bot", "list")).toBe("coworker\tCoworker\tfake/coworker\tidle\n");
   });
@@ -148,7 +148,7 @@ describe("pots", { timeout: 120_000 }, () => {
   it("adds, lists, replaces and removes routines, with the fallback check-in as a built-in one", async () => {
     /** The output with each time as <time>. */
     const plain = (text: string) => text.replace(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \w+ \([^)]*\)/g, "<time>");
-    const fallback = "- fallback check-in (built in, cannot be removed): every 120 minutes while no wake set with pots wake is pending\n  next: <time>\n";
+    const fallback = "- fallback check-in (built in, cannot be removed): every 120 minutes while no wake set with m1das wake is pending\n  next: <time>\n";
     expect(plain(await pots("routine", "list"))).toBe(`No routines added.\n${fallback}`);
 
     const standup = await pots("routine", "add", "standup", "--cron", "0 9 * * 1-5", "--note", "prepare the standup");
@@ -174,9 +174,9 @@ describe("pots", { timeout: 120_000 }, () => {
       ].join("\n"),
     );
 
-    // While a wake set with pots wake is pending, the fallback check-in waits.
+    // While a wake set with m1das wake is pending, the fallback check-in waits.
     const wake = JSON.parse(await pots("wake", "--in", "1h")) as { id: number };
-    expect(await pots("routine", "list")).toMatch(/\n {2}next: waits, because a wake set with pots wake is pending\n$/);
+    expect(await pots("routine", "list")).toMatch(/\n {2}next: waits, because a wake set with m1das wake is pending\n$/);
     await pots("wake", "--cancel", String(wake.id));
 
     expect(await fails("routine", "add", "x", "--every", "1h", "--cron", "0 9 * * *", "--note", "")).toBe("ERROR\n  give exactly one of --every and --cron");
@@ -234,14 +234,14 @@ describe("pots", { timeout: 120_000 }, () => {
     expect(answer).toBe("Coworker: ack: [wake] DM\n");
     await waitFor(() => gateway.query("SELECT 1 FROM gw_events WHERE channel = 'terminal' AND text = 'are you there?'").length === 1, { what: "the message in the log" });
 
-    // What the bot sends there after pots chat -m has ended comes first in the next one, and only once.
+    // What the bot sends there after m1das chat -m has ended comes first in the next one, and only once.
     const person = userInfo().username.toLowerCase().replace(/[^\w-]+/g, "-") || "you";
     await pots("send", `terminal:@${person}`, "the build is done");
     expect(await pots("chat", "--message", "thanks", "--timeout", "60")).toBe("Coworker: the build is done\nCoworker: ack: [wake] DM\n");
     expect(await pots("chat", "--message", "anything else?", "--timeout", "60")).toBe("Coworker: ack: [wake] DM\n");
   });
 
-  it("asks for secrets in pots chat, where the bot does not see them", async () => {
+  it("asks for secrets in m1das chat, where the bot does not see them", async () => {
     const params = { text: "Your two Slack tokens, please", file: "slack.env", keys: ["SLACK_APP_TOKEN", "SLACK_BOT_TOKEN"] };
     const asked = JSON.parse(await pots("call", "terminal", "ask-secret", JSON.stringify(params))) as { message: string; asked: unknown };
     expect(asked.asked).toEqual({ file: "slack.env", keys: ["SLACK_APP_TOKEN", "SLACK_BOT_TOKEN"] });
@@ -258,7 +258,7 @@ describe("pots", { timeout: 120_000 }, () => {
     if (process.platform !== "win32") expect(statSync(file).mode & 0o777).toBe(0o600);
 
     // The bot gets a message that names the keys; the values reach neither the bot's log nor the model.
-    await waitFor(() => gateway.query("SELECT 1 FROM gw_events WHERE channel = 'terminal' AND text LIKE '(pots chat: wrote %'").length === 1, { what: "the answer in the log" });
+    await waitFor(() => gateway.query("SELECT 1 FROM gw_events WHERE channel = 'terminal' AND text LIKE '(m1das chat: wrote %'").length === 1, { what: "the answer in the log" });
     expect(gateway.query("SELECT 1 FROM gw_events WHERE text LIKE '%hidden%' OR raw LIKE '%hidden%'")).toEqual([]);
     expect(JSON.stringify(model.requests)).not.toContain("hidden");
   });
@@ -273,13 +273,13 @@ describe("pots", { timeout: 120_000 }, () => {
   it("gives the command a mistyped one most likely means, not the whole help", async () => {
     const mistyped = await gateway.run(["bots", "new", "Ada", "--about", "our team's helper"]);
     expect(mistyped).toEqual({ status: 1, stdout: "", stderr: expect.any(String) });
-    expect(mistyped.stderr.trim()).toBe(`ERROR\n  Unknown subcommand "bots" for "pots"\n\n  Did you mean this?\n    pots bot new Ada --about 'our team'\\''s helper'`);
-    expect(await fails("bot", "lst")).toBe('ERROR\n  Unknown subcommand "lst" for "pots bot"\n\n  Did you mean this?\n    pots bot list');
+    expect(mistyped.stderr.trim()).toBe(`ERROR\n  Unknown subcommand "bots" for "m1das"\n\n  Did you mean this?\n    m1das bot new Ada --about 'our team'\\''s helper'`);
+    expect(await fails("bot", "lst")).toBe('ERROR\n  Unknown subcommand "lst" for "m1das bot"\n\n  Did you mean this?\n    m1das bot list');
     // With no close match, the help and the error, as before.
     const unknown = await gateway.run(["nothing-like-it"]);
     expect(unknown.status).toBe(1);
     expect(unknown.stdout).toContain("SUBCOMMANDS");
-    expect(unknown.stderr.trim()).toBe('ERROR\n  Unknown subcommand "nothing-like-it" for "pots"');
+    expect(unknown.stderr.trim()).toBe('ERROR\n  Unknown subcommand "nothing-like-it" for "m1das"');
     expect(existsSync(join(gateway.home, "bots", "ada"))).toBe(false);
   });
 });
@@ -299,8 +299,8 @@ describe("pots without a running gateway", { timeout: 120_000 }, () => {
     expect(readFileSync(join(dir, "responsibilities.md"), "utf8")).toBe("helps with releases\n");
     // Its first start: who made it and where they talk with it, what it is for, and that another bot may share its screen.
     const wake = readFileSync(join(dir, "first-wake.md"), "utf8");
-    expect(wake).toContain(`This is your first start. ${userInfo().username} just created you with pots bot new on this computer`);
-    expect(wake).toContain("pots chat --bot second-bot");
+    expect(wake).toContain(`This is your first start. ${userInfo().username} just created you with m1das bot new on this computer`);
+    expect(wake).toContain("m1das chat --bot second-bot");
     expect(wake).toContain('They described you in one sentence: "helps with releases".');
     expect(wake).toContain("Other bots already work on this computer: Coworker (coworker)");
     expect(wake).toContain("bots that share a screen wait for each other");
@@ -315,7 +315,7 @@ describe("pots without a running gateway", { timeout: 120_000 }, () => {
       expect.arrayContaining(["gateway: not running", "coworker: not running", "second-bot: not running", "second-bot-2: not running"]),
     );
     expect(await fails("send", "test:#general", "hi")).toBe("ERROR\n  say which bot with --bot <id> (bots: coworker, second-bot, second-bot-2)");
-    expect(await fails("send", "test:#general", "hi", "--bot", "coworker")).toMatch(/^ERROR\n {2}the bot is not running \(.*\); start it with pots service install or pots start$/);
+    expect(await fails("send", "test:#general", "hi", "--bot", "coworker")).toMatch(/^ERROR\n {2}the bot is not running \(.*\); start it with m1das service install or m1das start$/);
     expect(await pots("send", "test:#general", "hi", "--bot", "coworker", "--help")).toContain("Send a message.");
   });
 
@@ -323,9 +323,9 @@ describe("pots without a running gateway", { timeout: 120_000 }, () => {
     const made = await gateway.run(["bot", "new", "Helper", "--model", "fake/coworker", "--about", "answers questions"], { env: { POTS_BOT: "coworker" } });
     expect(made).toMatchObject({ status: 0, stderr: "" });
     const wake = readFileSync(join(gateway.home, "bots", "helper", "first-wake.md"), "utf8");
-    expect(wake).toContain(`This is your first start. Coworker, the bot whose folder is ${join(gateway.home, "bots", "coworker")}, created you with pots bot new`);
+    expect(wake).toContain(`This is your first start. Coworker, the bot whose folder is ${join(gateway.home, "bots", "coworker")}, created you with m1das bot new`);
     expect(wake).toContain("Until you join a chat app, Coworker passes messages both ways");
-    expect(wake).toContain('pots wake --bot coworker --from helper --note "<what to pass on>"');
+    expect(wake).toContain('m1das wake --bot coworker --from helper --note "<what to pass on>"');
     expect(wake).toContain('Coworker described you in one sentence: "answers questions".');
     expect(wake).toContain("Say hello in your terminal channel; Coworker passes it on.");
     expect(wake).toContain("Other bots already work on this computer: Coworker (coworker), Second Bot (second-bot), Second Bot (second-bot-2)");
@@ -338,7 +338,7 @@ describe("pots without a running gateway", { timeout: 120_000 }, () => {
     };
     expect(await init("nope/x")).toEqual({
       status: 1,
-      error: 'ERROR\n  nope/x cannot be used: pi has no login or key for "nope" on this computer. Run pots login in a terminal to sign in or add a key.',
+      error: 'ERROR\n  nope/x cannot be used: pi has no login or key for "nope" on this computer. Run m1das login in a terminal to sign in or add a key.',
     });
     expect(await init("fake/nope")).toEqual({ status: 1, error: 'ERROR\n  fake/nope cannot be used: "fake" has no model "nope". It has: coworker' });
     expect(await init("coworker")).toEqual({ status: 1, error: 'ERROR\n  --model must be "provider/modelId", for example anthropic/claude-opus-5-5' });
@@ -361,11 +361,11 @@ describe("pots without a running gateway", { timeout: 120_000 }, () => {
     expect(listed).toMatchObject({ status: 0, stdout: "Models (for --model):\n  fake/coworker\n" });
     const empty = join(gateway.home, "pi-empty");
     mkdirSync(empty, { recursive: true });
-    expect((await run(["login", "--list"], empty)).stdout).toBe("pi can use no model on this computer yet. Run pots login in a terminal to sign in or add a key.\n");
+    expect((await run(["login", "--list"], empty)).stdout).toBe("pi can use no model on this computer yet. Run m1das login in a terminal to sign in or add a key.\n");
     const asked = await run(["login"], empty);
     expect({ status: asked.status, error: asked.stderr.trim() }).toEqual({
       status: 1,
-      error: "ERROR\n  pots login asks questions, so it needs a terminal: run it in your own terminal. pots login --list works anywhere.",
+      error: "ERROR\n  m1das login asks questions, so it needs a terminal: run it in your own terminal. m1das login --list works anywhere.",
     });
   });
 

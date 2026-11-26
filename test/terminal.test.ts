@@ -97,7 +97,7 @@ function downTo(provider: string): string {
 
 const auth = () => JSON.parse(readFileSync(join(home, "pi", "auth.json"), "utf8")) as Record<string, { type: string; key?: string }>;
 
-describe.skipIf(!python)("pots in a terminal", { timeout: 90_000 }, () => {
+describe.skipIf(!python)("m1das in a terminal", { timeout: 90_000 }, () => {
   it("init moves through pi's own login prompt with the arrow keys", () => {
     home = mkdtempSync(join(tmpdir(), "pots-terminal-"));
     const screen = inTerminal(
@@ -250,10 +250,10 @@ describe.skipIf(!python)("pots in a terminal", { timeout: 90_000 }, () => {
         ],
       );
       expect(screen).not.toContain("already set up in pi");
-      expect(screen).toContain("Ready: local/coworker. A new bot can think with it: pots init --model local/coworker");
+      expect(screen).toContain("Ready: local/coworker. A new bot can think with it: m1das init --model local/coworker");
       expect(screen).toContain("It cannot be empty: paste it, or press Ctrl+C to go back");
       expect(screen).toContain("Trying typesafe/jev-latest…");
-      expect(screen).toContain("Ready as a judge: typesafe/jev-latest. A new bot can use it: pots init --judge typesafe/jev-latest");
+      expect(screen).toContain("Ready as a judge: typesafe/jev-latest. A new bot can use it: m1das init --judge typesafe/jev-latest");
       expect(screen).toMatch(/Done\s+Models \(for --model\):\s+local\/coworker\s+Judges \(for --judge\):\s+typesafe\/jev-latest\s+<<exited>>/);
       expect(auth().typesafe).toEqual({ type: "api_key", key: "good-key" });
       const listed = spawnSync(process.execPath, [POTS, "login", "--list"], { env: env(), encoding: "utf8" });
@@ -343,13 +343,13 @@ describe.skipIf(!python)("pots in a terminal", { timeout: 90_000 }, () => {
       .map((line) => JSON.parse(line) as { person: string; text: string })
       .filter((line) => line.person !== "bot")
       .map((line) => line.text);
-    expect(said).toEqual(["(pots chat: wrote SLACK_BOT_TOKEN to " + join(home, "pots", "secrets", "slack.env") + ")", "half a sentence"]);
+    expect(said).toEqual(["(m1das chat: wrote SLACK_BOT_TOKEN to " + join(home, "pots", "secrets", "slack.env") + ")", "half a sentence"]);
   });
 });
 
 // A sign-in opens no page in these tests: test/support/environment.ts sets BROWSER to a command that does nothing, and
 // puts an xdg-open and an open that do nothing first on PATH. On macOS pots reads $BROWSER itself.
-describe.runIf(process.platform === "darwin")("pots opens a page on macOS", () => {
+describe.runIf(process.platform === "darwin")("m1das opens a page on macOS", () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it("with the first command in $BROWSER that starts, and its arguments", async () => {

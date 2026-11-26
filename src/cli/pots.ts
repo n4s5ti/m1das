@@ -7,7 +7,7 @@ import { enableCompileCache } from "node:module";
 enableCompileCache();
 
 // node:sqlite is stable in newer Node 24 releases. Older ones, such as 24.13, print an ExperimentalWarning about it in
-// the middle of the first question of pots init; it says nothing a person can act on.
+// the middle of the first question of m1das init; it says nothing a person can act on.
 const emitWarning = process.emitWarning;
 process.emitWarning = ((warning: string | Error, ...rest: unknown[]) => {
   const text = typeof warning === "string" ? warning : warning.message;
@@ -15,6 +15,6 @@ process.emitWarning = ((warning: string | Error, ...rest: unknown[]) => {
   return (emitWarning as (...args: unknown[]) => void).call(process, warning, ...rest);
 }) as typeof process.emitWarning;
 
-// pots mcp is pi's own command, with pi's options, so it does not go through the parser of the other commands.
+// m1das mcp is pi's own command, with pi's options, so it does not go through the parser of the other commands.
 if (process.argv[2] === "mcp") await (await import("./mcp.ts")).runMcp(process.argv.slice(3));
 else await import("./commands.ts");

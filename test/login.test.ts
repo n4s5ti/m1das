@@ -140,7 +140,7 @@ describe("login pages in a gateway", { timeout: 120_000 }, () => {
     expect(wake).toContain("login page: someone used link G1 (made for test:@alice) and signed in to keyed (provider keyed, API key), for every bot and pi on this computer. Usable now: keyed/answer. keyed/answer answered when Pots tried it.");
     expect(JSON.stringify(model.requests)).not.toContain("sk-from-the-page");
     // The bot knows the command.
-    expect(model.requests.at(-1)!.system).toContain("pots page login [--provider <id>] [--text <text>] [--for <person address>]");
+    expect(model.requests.at(-1)!.system).toContain("m1das page login [--provider <id>] [--text <text>] [--for <person address>]");
     const listed = await gateway.run(["login", "--list"], { env: { PI_CODING_AGENT_DIR: join(gateway.home, "pi") } });
     expect(listed.stdout).toContain("keyed/answer");
     const list = JSON.parse((await gateway.run(["page", "list"])).stdout) as { loginLinks: unknown[] };
@@ -162,7 +162,7 @@ describe("login pages in a gateway", { timeout: 120_000 }, () => {
     await gateway.start();
     await waitFor(() => wakes(model).some((wake) => wake.includes("login page: Pots restarted")), { what: "the bot's wake", timeout: 20_000 });
     expect(wakes(model).find((wake) => wake.includes("login page: Pots restarted"))).toContain(
-      "login page: Pots restarted while someone was signing in to keyed on link G2 (made for anyone), so that sign-in was lost and the link ended. A new link (pots page login) lets them try again.",
+      "login page: Pots restarted while someone was signing in to keyed on link G2 (made for anyone), so that sign-in was lost and the link ended. A new link (m1das page login) lets them try again.",
     );
     const page = await http(port, "GET", path, { page: false });
     expect([page.status, page.body.includes("Pots restarted")]).toEqual([410, true]);
@@ -181,7 +181,7 @@ function freePort(): Promise<number> {
   });
 }
 
-describe("pots login --link", { timeout: 120_000 }, () => {
+describe("m1das login --link", { timeout: 120_000 }, () => {
   let home: string;
   let child: ChildProcess | undefined;
   afterAll(() => {

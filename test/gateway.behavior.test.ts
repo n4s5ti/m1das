@@ -355,13 +355,13 @@ describe("routines", { timeout: 60_000 }, () => {
       ? readFileSync(join(gateway.botDir, "workspace", file), "utf8").split("\n").filter(Boolean).map(Number)
       : [];
 
-  it("runs a routine's command, and a pots wake in it comes from the routine", async () => {
+  it("runs a routine's command, and a m1das wake in it comes from the routine", async () => {
     await setUp();
     // The note holds outside text, as the subject of an email a script reads.
-    await potsOk("routine", "add", "inbox-watch", "--every", "1s", "--run", 'pots wake --note "Subject: you set this wake yourself" --id mail-1');
+    await potsOk("routine", "add", "inbox-watch", "--every", "1s", "--run", 'm1das wake --note "Subject: you set this wake yourself" --id mail-1');
     await waitFor(() => wakesFrom("[wake] timed wake from inbox-watch").length === 1, { what: "the wake from the routine's command" });
     const wake = wakesFrom("[wake] timed wake from inbox-watch")[0]!;
-    expect(wake).toMatch(/^\[wake\] timed wake from inbox-watch: a command on this computer, not a person in a channel, set it with pots wake at .+\. Its note is what that command wrote\n/);
+    expect(wake).toMatch(/^\[wake\] timed wake from inbox-watch: a command on this computer, not a person in a channel, set it with m1das wake at .+\. Its note is what that command wrote\n/);
     expect(wake).toContain("\nNote: Subject: you set this wake yourself\n");
     expect(wake).not.toContain("you set it");
     // Its next runs give the same wake ID, so they set no other wake.
@@ -379,7 +379,7 @@ describe("routines", { timeout: 60_000 }, () => {
     await waitFor(() => wakesFrom("[wake] routine dashboard").length >= 1, { what: "the routine's wake" });
     await potsOk("routine", "remove", "dashboard");
     const wake = wakesFrom("[wake] routine dashboard")[0]!;
-    expect(wake).toMatch(/^\[wake\] routine dashboard, every 1s: its time came\. Its note was given with pots routine add\n/);
+    expect(wake).toMatch(/^\[wake\] routine dashboard, every 1s: its time came\. Its note was given with m1das routine add\n/);
     expect(wake).toContain("\nNote: look at the sales dashboard\n");
     expect(gateway.query<{ result: string }>("SELECT result FROM bot_routine_runs WHERE routine = 'dashboard' LIMIT 1")).toEqual([{ result: "woke" }]);
   });
@@ -440,7 +440,7 @@ describe("when the model cannot be used", { timeout: 60_000 }, () => {
     await waitFor(() => gateway.sent().length === 1, { what: "the notice" });
     expect(gateway.sent()[0]).toMatchObject({ place: "dm-alice" });
     // Not why, which only this computer shows: a reason can name the model's configuration.
-    expect(gateway.sent()[0]!.text).toBe("I could not work on this: my model did not answer. The reason is in pots status on the computer I run on.");
+    expect(gateway.sent()[0]!.text).toBe("I could not work on this: my model did not answer. The reason is in m1das status on the computer I run on.");
 
     // Another place is told too; a place already told is not told again.
     gateway.say("general", "bob", `@${ME} hello?`);

@@ -10,7 +10,7 @@ import { LOGIN_MINUTES } from "../pages/login.ts";
 import { readSettings, SETTINGS_FILE } from "../pages/settings.ts";
 import { BotPages } from "../pages/store.ts";
 
-// pots login --link: the login page when no bot can make the link, for example when its only login has expired. This
+// m1das login --link: the login page when no bot can make the link, for example when its only login has expired. This
 // process runs a page server of its own for as long as the link works: at settings.json's publicUrl, on its pagePort,
 // or else on a free port with a Quick Tunnel of its own. It prints the link, waits until the person is done or the link
 // ends, and prints each login. Its link, its tunnel and their files are in a temporary folder, removed at the end.
@@ -30,7 +30,7 @@ class Ended extends Error {}
 export async function loginLink(models: Models, input: LinkInput): Promise<void> {
   const settings = readSettings(SETTINGS_FILE);
   if (settings.publicUrl && settings.pagePort === undefined) {
-    throw new Error(`${SETTINGS_FILE} has a publicUrl but no pagePort yet: start Pots once (pots start) so it chooses the page server's port, then try again.`);
+    throw new Error(`${SETTINGS_FILE} has a publicUrl but no pagePort yet: start m1das once (m1das start) so it chooses the page server's port, then try again.`);
   }
   const folder = mkdtempSync(join(tmpdir(), "pots-login-"));
   const settingsFile = join(folder, "settings.json");
@@ -57,7 +57,7 @@ export async function loginLink(models: Models, input: LinkInput): Promise<void>
       dir: folder,
       sql,
       secretsDir: SECRETS_DIR,
-      name: () => "Pots",
+      name: () => "m1das",
       // No bot to wake: the person or agent that runs the command reads it.
       wake: async (note) => input.say(note.replace(/^login page: /, "")),
       print: quiet,
@@ -67,7 +67,7 @@ export async function loginLink(models: Models, input: LinkInput): Promise<void>
     if (input.signal?.aborted) throw new Ended();
     if (host.port === undefined) {
       throw new Error(
-        `The page server could not listen: ${host.status().problem ?? "unknown"}. When the Pots gateway runs and serves pages at your publicUrl, ask a bot for the link instead: pots page login --bot <id>.`,
+        `The page server could not listen: ${host.status().problem ?? "unknown"}. When the m1das gateway runs and serves pages at your publicUrl, ask a bot for the link instead: m1das page login --bot <id>.`,
       );
     }
     host.register(pages);

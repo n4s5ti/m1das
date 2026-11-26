@@ -38,6 +38,6 @@ export function processRunning(pid: number): boolean {
 
 /**
  * Windows has no SIGTERM. There the gateway takes `POST /stop` on this named pipe and stops as it does on SIGTERM
- * elsewhere; pots service asks it so before it ends the gateway's processes.
+ * elsewhere; m1das service asks it so before it ends the gateway's processes.
  */
 export const gatewayPipe = (pid: number) => `\\\\.\\pipe\\pots-gateway-${pid}`;

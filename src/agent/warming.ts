@@ -31,7 +31,7 @@ interface Warmed {
  * provider's cache entry of a conversation's last request expires, the same request goes out again with a one-token
  * answer, while it pays for itself by pi's numbers. During a run up to an hour after the request, after the run up to 30
  * minutes; pi's setting cacheWarming (off, streaming, idle) is the switch, shared with the pi CLI. Memory passes,
- * compaction and the judge are not warmed. A warm is a model request like the others, in `pots trace`.
+ * compaction and the judge are not warmed. A warm is a model request like the others, in `m1das trace`.
  */
 export class CacheWarming {
   readonly #Warmer: CacheWarmerClass;
@@ -121,7 +121,7 @@ export class CacheWarming {
     if (!warmed) {
       const session: WarmerSession = {
         getBranch: () => (warmed?.usage ? [{ type: "message", message: { role: "assistant", usage: warmed.usage } }] : []),
-        // The warm's model request is a span in `pots trace`, like every request; nothing else keeps it.
+        // The warm's model request is a span in `m1das trace`, like every request; nothing else keeps it.
         appendUsage: () => undefined,
       };
       warmed = { warmer: new this.#Warmer(this.#models, session, this.#mode) };

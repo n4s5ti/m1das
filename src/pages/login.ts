@@ -6,7 +6,7 @@ import { formatTime } from "../core/time.ts";
 import type { Print } from "../gateway/config.ts";
 
 // Login pages: one-time links with which a person signs in to a model provider, with a subscription or an API key, from
-// any device. The login is pi's own (models.login), run in this process as pots login runs it in a terminal, so the
+// any device. The login is pi's own (models.login), run in this process as m1das login runs it in a terminal, so the
 // callback servers stay here, and the PKCE verifier too, unless pi puts it in the sign-in URL (Anthropic's does). The
 // page renders pi's AuthInteraction: pi's questions become fields and buttons, its sign-in links and device codes are
 // shown, and the page follows pi while it waits. pi writes the login to its auth.json, which every bot of this user and
@@ -324,7 +324,7 @@ export class BotLogins {
   readonly #live = new Map<number, Live>();
   #stopped = false;
   #wakeRetry: ReturnType<typeof setTimeout> | undefined;
-  /** For pots login --link: called when a link ends. */
+  /** For m1das login --link: called when a link ends. */
   onEnd: ((id: string) => void) | undefined;
 
   private constructor(options: LoginOptions) {
@@ -366,7 +366,7 @@ export class BotLogins {
 
   // ---- Links ----
 
-  /** pots page login: a link, written before it is given out. */
+  /** m1das page login: a link, written before it is given out. */
   async create(input: { provider?: string; text?: string; person?: string }): Promise<{ id: string; token: string; expiresAt: number }> {
     const text = (input.text ?? "").trim();
     if (text.length > MAX_TEXT) throw new Error(`--text is longer than ${MAX_TEXT} characters`);
@@ -586,7 +586,7 @@ export class BotLogins {
     return { ok: true };
   }
 
-  /** pots page unlink: by link ID (G3) or token. The link ID, or undefined when it is not a login link of this bot. */
+  /** m1das page unlink: by link ID (G3) or token. The link ID, or undefined when it is not a login link of this bot. */
   async revoke(link: string): Promise<string | undefined> {
     const number = /^G(\d+)$/.exec(link);
     const row = number
@@ -599,7 +599,7 @@ export class BotLogins {
     return linkId(row);
   }
 
-  /** For pots page list: the links of the last 7 days, with the providers signed in through each. */
+  /** For m1das page list: the links of the last 7 days, with the providers signed in through each. */
   async list(): Promise<{ link: string; token: string; for: string | null; provider: string | null; created: number; expires: number; state: Stored; started: number | null; ended: number | null; signedIn: string[] }[]> {
     const rows = await this.#sql.all<LinkRow>("SELECT * FROM bot_login_links WHERE state != 'revoked' ORDER BY id");
     const logins = await this.#sql.all<LoginRow>("SELECT * FROM bot_logins ORDER BY link_id, n");
@@ -764,7 +764,7 @@ export class BotLogins {
   }
 
   /**
-   * After a login, as pots login does: the models pi can use with it now, and pi's default model of the provider tried,
+   * After a login, as m1das login does: the models pi can use with it now, and pi's default model of the provider tried,
    * or the first one; for a provider that has only judges, such as TypeSafe's Jev, the first judge.
    */
   async #tryAfter(login: Running): Promise<Extract<Outcome, { ok: true }>> {
@@ -869,7 +869,7 @@ export class BotLogins {
     const link = `link ${linkId(row)} (made for ${madeFor(row.made_for)})`;
     const failed = row.failed > 0 ? ` ${row.failed === 1 ? "One sign-in" : `${row.failed} sign-ins`} on it failed; their page showed why.` : "";
     if (row.state === "restarted") {
-      return `login page: Pots restarted while someone was signing in to ${row.running ?? "a provider"} on ${link}, so that sign-in was lost and the link ended. A new link (pots page login) lets them try again.`;
+      return `login page: Pots restarted while someone was signing in to ${row.running ?? "a provider"} on ${link}, so that sign-in was lost and the link ended. A new link (m1das page login) lets them try again.`;
     }
     if (row.state === "done") return `login page: someone pressed Done on ${link} without signing in to anything.${failed}`;
     if (row.started_at === null) return `login page: ${link} expired at ${formatTime(row.expires_at)}: nobody pressed Start within an hour.`;
@@ -962,7 +962,7 @@ function noteText(row: LinkRow, outcome: Extract<Outcome, { ok: true }>, listed:
   return parts.filter(Boolean).join(" ");
 }
 
-/** A subscription's name as pots login shows it. */
+/** A subscription's name as m1das login shows it. */
 function oauthName(provider: Provider): string {
   return provider.auth.oauth?.loginLabel ?? provider.auth.oauth?.name ?? provider.name;
 }

@@ -77,7 +77,7 @@ export type Happening = typeof Happening.Type;
  * the form's submission, which on some platforms carries only that ID, gets its place and message back.
  */
 export interface FormOpening {
-  /** The form's name, as pots form add stored it. */
+  /** The form's name, as m1das form add stored it. */
   readonly form: string;
   /** What followed form:<name>: in the button's ID. */
   readonly extra?: string;
@@ -106,7 +106,7 @@ export interface ChannelSink {
   places(): Promise<Address[]>;
   /** When the gateway last ran, in Unix ms. Undefined on the first start. */
   lastAlive(): number | undefined;
-  /** The form stored with pots form add under this name, as the bot gave it: a JSON object, which the adapter checks. */
+  /** The form stored with m1das form add under this name, as the bot gave it: a JSON object, which the adapter checks. */
   form(name: string): Promise<Record<string, unknown> | undefined>;
   /** Keep what a form opened for, under an ID the adapter made, before the form opens. The same ID again replaces it. */
   formOpened(id: string, opening: FormOpening): Promise<void>;

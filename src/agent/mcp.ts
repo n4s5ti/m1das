@@ -142,7 +142,7 @@ interface Server {
   connection?: Connection;
   /** Settles when the latest connection attempt connected or failed. */
   ready?: Promise<void>;
-  /** The stored sign-in when the server came to need one; a sign-in by pots mcp login changes it. */
+  /** The stored sign-in when the server came to need one; a sign-in by m1das mcp login changes it. */
   signIn?: string;
   /** The state last logged, so each problem is logged once. */
   logged?: string;
@@ -192,7 +192,7 @@ function scriptTool(tool: PiTool): ToolRegistration {
 /**
  * The MCP servers of one bot, from pi's mcp.json, read again before each request: a server added, removed or changed
  * there connects, goes or reconnects from the bot's next wake, and a server that needed a sign-in is used from the next
- * request after `pots mcp login`. `extensions()` holds the servers' tools; they change as servers come, go and connect.
+ * request after `m1das mcp login`. `extensions()` holds the servers' tools; they change as servers come, go and connect.
  */
 export class Mcp {
   readonly #options: McpOptions;
@@ -441,7 +441,7 @@ export class Mcp {
     return url && this.#credentials ? JSON.stringify(this.#credentials.tokens(connection.name, url) ?? null) : "null";
   }
 
-  /** Servers that needed a sign-in and whose stored sign-in changed since, for example by pots mcp login. */
+  /** Servers that needed a sign-in and whose stored sign-in changed since, for example by m1das mcp login. */
   #reconnectSignedIn(): void {
     for (const server of this.#servers.values()) {
       const connection = server.connection;

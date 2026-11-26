@@ -5,7 +5,7 @@ description: "The desktop page, a one-time link with which a person sees and con
 
 # The desktop page
 
-`pots page desktop` gives you a link to a page of Pots' own. The person who opens it sees your whole screen and controls it with their mouse and keyboard, or their fingers on a phone, does the step, and hands the desktop back. It works through a VNC server that shows your screen on this computer: Pots signs in to it itself, so its password never leaves this computer. They see what you see: the browser's own bars and prompts, other apps, and every site signed in there.
+`m1das page desktop` gives you a link to a page of Pots' own. The person who opens it sees your whole screen and controls it with their mouse and keyboard, or their fingers on a phone, does the step, and hands the desktop back. It works through a VNC server that shows your screen on this computer: Pots signs in to it itself, so its password never leaves this computer. They see what you see: the browser's own bars and prompts, other apps, and every site signed in there.
 
 ## The screen they get
 
@@ -18,7 +18,7 @@ description: "The desktop page, a one-time link with which a person sees and con
 ## Make a link
 
 ```sh
-pots page desktop --text "Sign in to LinkedIn with your password. If a check comes, solve it. Then press Done." --for slack:@U123 --input password
+m1das page desktop --text "Sign in to LinkedIn with your password. If a check comes, solve it. Then press Done." --for slack:@U123 --input password
 ```
 
 | Flag | What it does |
@@ -44,8 +44,8 @@ It prints JSON: `{"link": "D1", "url": "https://…/d/<token>/", "expires": "<ti
 ## While it is in use
 
 - From Start until the link ends, the person holds your screen: screen commands, yours, your children's and those of other bots on this screen, do not run, and say why.
-- `pots page list` lists the link under `desktopLinks`: its state (`open`, `started`, `done`, `cannot`, `expired`), when it ends, and whether a browser is connected now.
-- `pots page unlink D1` ends it at once: their page closes, the desktop gets its size back, and no wake comes.
+- `m1das page list` lists the link under `desktopLinks`: its state (`open`, `started`, `done`, `cannot`, `expired`), when it ends, and whether a browser is connected now.
+- `m1das page unlink D1` ends it at once: their page closes, the desktop gets its size back, and no wake comes.
 
 ## When you are woken
 
@@ -81,16 +81,16 @@ Then add to bot.json, next to `screen`:
 "vnc": {"port": 5900, "passwordFile": "vnc.env"}
 ```
 
-- `passwordFile` is a file name in the secrets folder, or a path (`~/` works). The file holds `VNC_PASSWORD=<password>`, as `pots page secret --file vnc.env --keys VNC_PASSWORD` writes it, or it is a password file as `vncpasswd` writes it. VNC uses the first 8 characters of a password.
+- `passwordFile` is a file name in the secrets folder, or a path (`~/` works). The file holds `VNC_PASSWORD=<password>`, as `m1das page secret --file vnc.env --keys VNC_PASSWORD` writes it, or it is a password file as `vncpasswd` writes it. VNC uses the first 8 characters of a password.
 - Leave `passwordFile` out only for a server that asks for no password, which must then listen on this computer only.
-- bot.json changes apply within seconds. Then `pots page desktop` checks the server when it makes a link.
+- bot.json changes apply within seconds. Then `m1das page desktop` checks the server when it makes a link.
 
 | Computer | A VNC server for its screen |
 |---|---|
 | Linux with an X11 desktop | TigerVNC's `x0vncserver` shares the running desktop: `x0vncserver -display :0 -localhost -rfbport 5900 -SecurityTypes VncAuth -PasswordFile ~/.vnc/passwd`, with the password from `vncpasswd ~/.vnc/passwd`. `x11vnc -display :0 -localhost -rfbauth ~/.vnc/passwd -forever -shared` works too. Run it as a user service, so it starts again after a restart. |
 | Linux with a Wayland desktop | `wayvnc` for wlroots desktops (Sway, Hyprland), GNOME Remote Desktop's VNC backend, or TigerVNC's `w0vncserver` (1.16 and newer). |
 | Linux with no desktop | A virtual desktop: TigerVNC's `Xvnc :1 -geometry 1280x800 -localhost -rfbport 5901 -SecurityTypes VncAuth -PasswordFile ~/.vnc/passwd`, a window manager and the browser on `DISPLAY=:1`; then `"screen": {"DISPLAY": ":1"}` and `"vnc": {"port": 5901, …}` in bot.json. Xvnc can change its size for the person's screen. The packages need sudo (on Ubuntu, `tigervnc-standalone-server`). |
-| macOS | Screen Sharing, turned on by the person: System Settings, General, Sharing, Screen Sharing, the info button, "VNC viewers may control screen with password", and a password. It listens on port 5900. Take the password with `pots page secret --file vnc.env --keys VNC_PASSWORD`. |
+| macOS | Screen Sharing, turned on by the person: System Settings, General, Sharing, Screen Sharing, the info button, "VNC viewers may control screen with password", and a password. It listens on port 5900. Take the password with `m1das page secret --file vnc.env --keys VNC_PASSWORD`. |
 | Windows | A VNC server such as TightVNC, with a password. TightVNC refuses connections from the same computer until "Allow loopback connections" is on in its Access Control settings; "Allow only loopback connections" keeps it off the network. |
 
 What the desktop page cannot do: sound, file transfer, and copying from the desktop to a phone. Whether a phone's Chinese, Japanese or Korean characters arrive depends on the VNC server: TigerVNC's do.
@@ -147,7 +147,7 @@ WantedBy=<id>-xvnc.service
 "vnc": {"port": 5902, "passwordFile": "<id>-vnc.passwd"}
 ```
 
-Check it: a screenshot of `:2` shows the browser, `pots page desktop` makes a link, and after `systemctl --user restart <id>-xvnc` it all comes back.
+Check it: a screenshot of `:2` shows the browser, `m1das page desktop` makes a link, and after `systemctl --user restart <id>-xvnc` it all comes back.
 
 ## When you drive a Linux desktop
 

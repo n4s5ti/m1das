@@ -1,6 +1,11 @@
 # Changelog
 
-What changed in each version of pi-durable-bot (Pots). To upgrade, run `npm install -g pi-durable-bot@latest`, then `pots service restart`.
+What changed in each version of pi-durable-bot (Pots). To upgrade a fork checkout, run `git pull`, `npm install`, and `npm link`, then `m1das service restart`.
+
+## Unreleased
+
+### Changed
+- Renamed the command-line interface from `pots` to `m1das`.
 
 ## 0.8.8 (2026-11-21)
 
