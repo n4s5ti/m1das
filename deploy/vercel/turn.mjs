@@ -12,9 +12,6 @@ import { spawn } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-/** Marks an event line on stdout; never in pots chat's own output. */
-export const EVENT = "\x1e";
-
 /** The ID of the message with this text that the person (not the bot) added to the terminal file after `offset`. */
 export function sentId(fileText, text) {
   for (const raw of fileText.split("\n")) {
@@ -62,15 +59,19 @@ async function main() {
   const terminal = `${dir}/terminal/platform.jsonl`;
   const from = existsSync(terminal) ? statSync(terminal).size : 0;
 
-  // Whole lines only, so an event line never lands inside a line of pots chat's output.
+  // Every stdout line is one JSON frame: {"k":"text","v":<a line of pots chat's output>} or {"k":"event",...}.
+  // The bot's text is data inside a frame, so nothing it writes can pass for an event.
   let pending = "";
+  const textFrames = (lines) => {
+    for (const line of lines) process.stdout.write(`${JSON.stringify({ k: "text", v: line })}\n`);
+  };
   const child = spawn(cli, ["chat", "--bot", bot, "--timeout", timeout, "-m", text], { stdio: ["ignore", "pipe", "inherit"] });
   child.stdout.setEncoding("utf8");
   child.stdout.on("data", (chunk) => {
     pending += chunk;
     const end = pending.lastIndexOf("\n");
     if (end === -1) return;
-    process.stdout.write(pending.slice(0, end + 1));
+    textFrames(pending.slice(0, end).split("\n"));
     pending = pending.slice(end + 1);
   });
   const exited = new Promise((resolve) => child.on("close", (code) => resolve(code ?? 1)));
@@ -100,7 +101,7 @@ async function main() {
         const key = `${event.t}:${event.id}`;
         if (shown.has(key)) continue;
         shown.add(key);
-        process.stdout.write(`${EVENT}${JSON.stringify(event)}\n`);
+        process.stdout.write(`${JSON.stringify({ k: "event", ...event })}\n`);
       }
     } catch (error) {
       // The answer still comes without the tool calls; say why once.
@@ -113,7 +114,7 @@ async function main() {
   const code = await exited;
   clearInterval(timer);
   poll();
-  if (pending) process.stdout.write(pending);
+  if (pending) textFrames([pending]);
   db?.close();
   process.exit(code);
 }

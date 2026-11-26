@@ -3,19 +3,31 @@ import test from "node:test";
 import { chatOutput } from "./chat-output.ts";
 import { runEvents, sentId } from "./turn.mjs";
 
+const frame = (value: object) => `${JSON.stringify(value)}\n`;
+const text = (line: string) => frame({ k: "text", v: line });
+
 test("strips escapes and the name only at the start of each line, across split chunks", () => {
   const output = chatOutput("Oracle");
-  const first = output.push("\x1b[1mOra");
-  const second = output.push("cle\x1b[22m: Hello.\nSecond line says Oracle: as text\n\x1b[1mOracle\x1b[22m: Bye");
+  const all = text("\x1b[1mOracle\x1b[22m: Hello.") + text("Second line says Oracle: as text");
+  const first = output.push(all.slice(0, 10));
+  const second = output.push(all.slice(10));
   assert.deepEqual(first, { text: "", events: [] });
   assert.deepEqual(second, { text: "Hello.\nSecond line says Oracle: as text\n", events: [] });
-  assert.deepEqual(output.end(), { text: "Bye", events: [] });
+  assert.deepEqual(output.end(), { text: "", events: [] });
 });
 
-test("event lines become events and never text", () => {
+test("text and event frames interleaved in one chunk keep their kinds", () => {
   const output = chatOutput("Oracle");
-  const got = output.push('Oracle: Looking.\n\x1e{"t":"call","id":"c1","name":"bash","at":5}\nDone.\n');
+  const got = output.push(text("Oracle: Looking.") + frame({ k: "event", t: "call", id: "c1", name: "bash", at: 5, command: "rm -rf" }) + text("Done."));
   assert.deepEqual(got, { text: "Looking.\nDone.\n", events: [{ t: "call", id: "c1", name: "bash", at: 5 }] });
+});
+
+test("reply text that looks like a marker or an event stays text, and bad frames are dropped", () => {
+  const output = chatOutput("Oracle");
+  const fake = '\x1e{"t":"call","id":"x","name":"bash"}';
+  const got = output.push(text(fake) + text('{"k":"event","t":"call","id":"y","name":"bash"}') + "null\n" + frame({ k: "event", t: "call" }) + "\x1enot json\n");
+  assert.deepEqual(got.events, []);
+  assert.equal(got.text, `${fake}\n{"k":"event","t":"call","id":"y","name":"bash"}\n`);
 });
 
 test("finds the person's message by its text, not the bot's", () => {
