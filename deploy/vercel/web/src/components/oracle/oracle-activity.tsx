@@ -34,7 +34,7 @@ type ToolPart = {
 };
 
 const time = (at: number | undefined) =>
-  at ? new Date(at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
+  at ? new Date(at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) : "";
 
 const duration = (ms: number | undefined) => (ms === undefined ? undefined : ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`);
 
