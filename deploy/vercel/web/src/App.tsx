@@ -2,6 +2,7 @@ import { AssistantRuntimeProvider, WebSpeechDictationAdapter } from '@assistant-
 import { useChatRuntime } from '@assistant-ui/ai-sdk'
 import { useSyncExternalStore } from 'react'
 import { Thread, type ThreadComponents } from '@/components/assistant-ui/elements/thread.aui'
+import { OracleActivity } from '@/components/oracle/oracle-activity'
 import { OracleStatus } from '@/components/oracle/oracle-status'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
@@ -12,6 +13,7 @@ const THREAD_COMPONENTS: ThreadComponents = {
       <p className="mt-2 text-sm text-muted-foreground">AMATI's oracle. Messages go to the same bot as its terminal.</p>
     </div>
   ),
+  ToolGroup: OracleActivity,
 }
 
 // Voice input only where the browser has speech recognition.

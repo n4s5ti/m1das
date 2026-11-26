@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build:web",
   "outputDirectory": "web/dist",
-  "functions": { "api/rotate.ts": { "maxDuration": 800 }, "api/login.ts": { "maxDuration": 800 }, "api/health.ts": { "maxDuration": 60 }, "api/discord.ts": { "maxDuration": 30 }, "api/chat.ts": { "maxDuration": 800 } },
+  "functions": { "api/rotate.ts": { "maxDuration": 800 }, "api/login.ts": { "maxDuration": 800 }, "api/health.ts": { "maxDuration": 60 }, "api/discord.ts": { "maxDuration": 30 }, "api/chat.ts": { "maxDuration": 800, "includeFiles": "turn.mjs" } },
   "crons": [{ "path": "/api/rotate", "schedule": "0 * * * *" }]
 }
